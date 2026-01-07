@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Classes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        h2 { color: #2c3e50; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { text-decoration: none; color: #2980b9; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+        .count { color: #7f8c8d; margin-left: 10px; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <h2>All Classes / Forms</h2>
+    <ul>
+        {% for c in classes %}
+            <li>
+                <a href="/attendance/{{ class_name|urlencode }}">Mark Attendance</a>
+                <a href="/class/{{ c[0]|urlencode }}">{{ c[0] }}</a>
+                <span class="count">({{ c[1] }} students)</span>
+            </li>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="/">Back to Home</a>
+</body>
+</html>
+

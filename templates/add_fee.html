@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Fee</title>
+</head>
+<body>
+    <h2>Add Fee for Student</h2>
+    <form method="POST">
+        <label>Student:</label>
+        <select name="student_id" required>
+            {% for s in students %}
+                <option value="{{ s[0] }}">{{ s[1] }} {{ s[2] }} ({{ s[4] }})</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Amount:</label>
+        <input type="number" step="0.01" name="amount" required><br><br>
+
+        <label>Due Date:</label>
+        <input type="date" name="due_date" required><br><br>
+
+        <label>Status:</label>
+        <select name="status" required>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Paid">Paid</option>
+        </select><br><br>
+
+        <button type="submit">Add Fee</button>
+    </form>
+    <br>
+    <a href="/fees">Back to Fees</a>
+</body>
+</html>

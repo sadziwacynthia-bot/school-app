@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance - {{ class_name }}</title>
+</head>
+<body>
+    <h2>Attendance for {{ class_name }}</h2>
+    <form method="POST">
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+            </tr>
+            {% for s in students %}
+            <tr>
+                <td>{{ s[1] }} {{ s[2] }}</td>
+                <td><input type="radio" name="{{ s[0] }}" value="Present" required></td>
+                <td><input type="radio" name="{{ s[0] }}" value="Absent" required></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <button type="submit">Submit Attendance</button>
+    </form>
+    <br>
+    <a href="/classes">Back to Classes</a>
+</body>
+</html>

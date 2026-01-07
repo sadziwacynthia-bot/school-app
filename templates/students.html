@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Registered Students</h2>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Class</th>
+        <th>Date of Birth</th>
+    </tr>
+
+    {% for s in students %}
+    <tr>
+        <td>{{ s[1] }} {{ s[2] }}</td>
+        <td>{{ s[3] }}</td>
+        <td>{{ s[4] }}</td>
+        <td>{{ s[5] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

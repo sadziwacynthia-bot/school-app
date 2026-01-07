@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Classes</title>
+</head>
+<body>
+    <h2>All Classes / Forms</h2>
+    <ul>
+        {% for c in classes %}
+            <li>
+                <a href="/class/{{ c[0] }}">{{ c[0] }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Home</a>
+</body>
+</html>
