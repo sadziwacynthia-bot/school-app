@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+
+<h2>Welcome to the School Management System</h2>
+
+<p>Use the sidebar to navigate through the system.</p>
+
+<div class="stats">
+
+    <div class="stat-card">
+        <div class="stat-label">Students</div>
+        <div class="stat-value">{{ total_students }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Classes</div>
+        <div class="stat-value">{{ total_classes }}</div>
+    </div>
+
+  
+
+</div>
+
+{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>School Dashboard</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f4f6f9;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:500px;
+margin:auto;
+text-align:center;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+a{
+display:block;
+margin:15px;
+padding:12px;
+background:#2563eb;
+color:white;
+text-decoration:none;
+border-radius:6px;
+}
+
+a:hover{
+background:#1e40af;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>School Management System</h1>
+
+<a href="/add_student">Register Student</a>
+
+<a href="/students">View Students</a>
+
+<a href="/classes">Classes</a>
+
+<a href="/fees">Fees</a>
+
+<a href="/attendance">Attendance</a>
+
+</div>
+
+</body>
+</html>

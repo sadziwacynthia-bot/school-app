@@ -1,17 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Classes</title>
-</head>
-<body>
-    <h2>All Classes / Forms</h2>
-    <ul>
-        {% for c in classes %}
-            <li>
-                <a href="/class/{{ c[0] }}">{{ c[0] }}</a>
-            </li>
-        {% endfor %}
-    </ul>
-    <a href="/">Back to Home</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Classes{% endblock %}
+{% block page_title %}Classes{% endblock %}
+
+{% block content %}
+<div class="stats">
+    {% for class_item in class_records %}
+    <div class="stat-card">
+        <div class="stat-label">{{ class_item.class_name }}</div>
+        <div class="stat-value">{{ class_item.total_students }}</div>
+        <div style="margin-top:15px;">
+            <a href="/class/{{ class_item.class_name }}" class="btn">View Class</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not class_records %}
+<div class="empty-box">No classes found yet.</div>
+{% endif %}
+{% endblock %}

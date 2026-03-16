@@ -1,25 +1,51 @@
-<!DOCTYPE html>
-<html>
-<body>
-    <h2>Registered Students</h2>
+{% extends "base.html" %}
 
-<table border="1" cellpadding="5">
+{% block title %}Students{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <form method="GET" action="/students" class="mb-20">
+        <div class="grid">
+            <div>
+                <label>Search Students</label>
+                <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by name, student number, or class">
+            </div>
+            <div style="display:flex; align-items:end;">
+                <button type="submit" class="btn">Search</button>
+            </div>
+        </div>
+    </form>
+
+    {% if student_records %}
+    <table>
+       <thead>
     <tr>
+        <th>Student Number</th>
         <th>Name</th>
-        <th>Email</th>
         <th>Class</th>
-        <th>Date of Birth</th>
+        <th>Gender</th>
+        <th>Phone</th>
+        <th>Actions</th>
     </tr>
-
-    {% for s in students %}
-    <tr>
-        <td>{{ s[1] }} {{ s[2] }}</td>
-        <td>{{ s[3] }}</td>
-        <td>{{ s[4] }}</td>
-        <td>{{ s[5] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-</body>
-</html>
+</thead>
+        <tbody>
+            {% for student in student_records %}
+            <tr>
+                <td>{{ student.student_number }}</td>
+                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                <td>{{ student.class_name }}</td>
+                <td>{{ student.gender }}</td>
+                <td>{{ student.student_phone }}</td>
+                <td>
+    <a href="/student/{{ student.id }}" class="btn">View Profile</a>
+</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-box">No students found.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Student{% endblock %}
+{% block page_title %}Edit Student{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <form method="POST" action="/update_student/{{ student.id }}">
+
+        <h3>Student Information</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>First Name</label>
+                <input name="first_name" value="{{ student.first_name }}" required>
+            </div>
+
+            <div>
+                <label>Last Name</label>
+                <input name="last_name" value="{{ student.last_name }}" required>
+            </div>
+
+            <div>
+                <label>Date of Birth</label>
+                <input type="date" name="birthday" value="{{ student.birthday }}">
+            </div>
+
+            <div>
+                <label>Gender</label>
+                <select name="gender">
+                    <option value="Male" {% if student.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if student.gender == "Female" %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Enrollment Date</label>
+                <input type="date" name="enrollment_date" value="{{ student.enrollment_date }}">
+            </div>
+
+            <div>
+                <label>Expected Leaving Year</label>
+                <input type="number" name="leaving_year" value="{{ student.leaving_year }}">
+            </div>
+
+            <div>
+                <label>Class</label>
+                <select name="class_name">
+                    <option value="Form 1 Blue" {% if student.class_name == "Form 1 Blue" %}selected{% endif %}>Form 1 Blue</option>
+                    <option value="Form 1 Grey" {% if student.class_name == "Form 1 Grey" %}selected{% endif %}>Form 1 Grey</option>
+                    <option value="Form 2 Blue" {% if student.class_name == "Form 2 Blue" %}selected{% endif %}>Form 2 Blue</option>
+                    <option value="Form 2 Grey" {% if student.class_name == "Form 2 Grey" %}selected{% endif %}>Form 2 Grey</option>
+                    <option value="Form 3 Blue" {% if student.class_name == "Form 3 Blue" %}selected{% endif %}>Form 3 Blue</option>
+                    <option value="Form 3 Grey" {% if student.class_name == "Form 3 Grey" %}selected{% endif %}>Form 3 Grey</option>
+                    <option value="Form 4 Blue" {% if student.class_name == "Form 4 Blue" %}selected{% endif %}>Form 4 Blue</option>
+                    <option value="Form 4 Grey" {% if student.class_name == "Form 4 Grey" %}selected{% endif %}>Form 4 Grey</option>
+                    <option value="Form 5" {% if student.class_name == "Form 5" %}selected{% endif %}>Form 5</option>
+                    <option value="Lower 6" {% if student.class_name == "Lower 6" %}selected{% endif %}>Lower 6</option>
+                    <option value="Upper 6" {% if student.class_name == "Upper 6" %}selected{% endif %}>Upper 6</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Student Phone</label>
+                <input name="student_phone" value="{{ student.student_phone }}">
+            </div>
+        </div>
+
+        <div class="mb-20">
+            <label>Home Address</label>
+            <textarea name="home_address">{{ student.home_address }}</textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Mailing Address</label>
+            <textarea name="mailing_address">{{ student.mailing_address }}</textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Medical Information</label>
+            <textarea name="medical_info">{{ student.medical_info }}</textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Emergency Contact</label>
+            <input name="emergency_contact" value="{{ student.emergency_contact }}">
+        </div>
+
+        <h3>Guardian 1</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>Full Name</label>
+                <input name="guardian1_name" value="{{ student.guardian1_name }}">
+            </div>
+
+            <div>
+                <label>Relationship</label>
+                <input name="guardian1_relationship" value="{{ student.guardian1_relationship }}">
+            </div>
+
+            <div>
+                <label>Phone</label>
+                <input name="guardian1_phone" value="{{ student.guardian1_phone }}">
+            </div>
+
+            <div>
+                <label>WhatsApp</label>
+                <input name="guardian1_whatsapp" value="{{ student.guardian1_whatsapp }}">
+            </div>
+
+            <div>
+                <label>Email</label>
+                <input name="guardian1_email" value="{{ student.guardian1_email }}">
+            </div>
+        </div>
+
+        <h3>Guardian 2</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>Full Name</label>
+                <input name="guardian2_name" value="{{ student.guardian2_name }}">
+            </div>
+
+            <div>
+                <label>Relationship</label>
+                <input name="guardian2_relationship" value="{{ student.guardian2_relationship }}">
+            </div>
+
+            <div>
+                <label>Phone</label>
+                <input name="guardian2_phone" value="{{ student.guardian2_phone }}">
+            </div>
+
+            <div>
+                <label>WhatsApp</label>
+                <input name="guardian2_whatsapp" value="{{ student.guardian2_whatsapp }}">
+            </div>
+
+            <div>
+                <label>Email</label>
+                <input name="guardian2_email" value="{{ student.guardian2_email }}">
+            </div>
+        </div>
+
+        <button type="submit" class="btn">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School Management System{% endblock %}</title>
+
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+
+        body{
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .layout{
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar{
+            width: 240px;
+            background: #1e3a8a;
+            color: white;
+            padding: 24px 18px;
+        }
+
+        .brand{
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .nav a{
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        .nav a:hover{
+            background: rgba(255,255,255,0.15);
+        }
+
+        .main{
+            flex: 1;
+            padding: 30px;
+        }
+
+        .topbar{
+            background: white;
+            border-radius: 14px;
+            padding: 18px 22px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+
+        .page-title{
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .page-subtitle{
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .content-card{
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            padding: 24px;
+        }
+
+        .alert{
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-weight: 600;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .btn{
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn:hover{
+            background: #1d4ed8;
+        }
+
+        .grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .mb-20{
+            margin-bottom: 20px;
+        }
+
+        table{
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th{
+            background: #eff6ff;
+            color: #1e3a8a;
+            text-align: left;
+            padding: 14px;
+        }
+
+        td{
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover{
+            background: #f9fafb;
+        }
+
+        input, select, textarea{
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            margin-top: 6px;
+        }
+
+        label{
+            font-weight: bold;
+            color: #374151;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .empty-box{
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            color: #6b7280;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .stats{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card{
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            padding: 22px;
+        }
+
+        .stat-label{
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value{
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="brand">School System</div>
+            <div class="nav">
+                <a href="/">Dashboard</a>
+                <a href="/students">Students</a>
+                <a href="/add_student">Register Student</a>
+                <a href="/classes">Classes</a>
+                <a href="/attendance">Attendance</a>
+                <a href="/fees">Fees</a>
+                <a href="/generate_fees">Generate Fees</a>    
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <div class="page-title">{% block page_title %}School Management System{% endblock %}</div>
+                <div class="page-subtitle">Professional school portal</div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

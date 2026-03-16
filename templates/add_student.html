@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Register Student{% endblock %}
+{% block page_title %}Register Student{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <form action="/save_student" method="POST">
+
+        <h3>Student Information</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>First Name</label>
+                <input name="first_name" required>
+            </div>
+
+            <div>
+                <label>Last Name</label>
+                <input name="last_name" required>
+            </div>
+
+            <div>
+                <label>Date of Birth</label>
+                <input type="date" name="birthday">
+            </div>
+
+            <div>
+                <label>Gender</label>
+                <select name="gender">
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Enrollment Date</label>
+                <input type="date" name="enrollment_date">
+            </div>
+
+            <div>
+                <label>Expected Leaving Year</label>
+                <input type="number" name="leaving_year" placeholder="Example: 2029">
+            </div>
+
+            <div>
+                <label>Class</label>
+                <select name="class_name">
+                    <option>Form 1 Blue</option>
+                    <option>Form 1 Grey</option>
+                    <option>Form 2 Blue</option>
+                    <option>Form 2 Grey</option>
+                    <option>Form 3 Blue</option>
+                    <option>Form 3 Grey</option>
+                    <option>Form 4 Blue</option>
+                    <option>Form 4 Grey</option>
+                    <option>Form 5</option>
+                    <option>Lower 6</option>
+                    <option>Upper 6</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Student Phone Number</label>
+                <input name="student_phone">
+            </div>
+        </div>
+
+        <div class="mb-20">
+            <label>Home Address</label>
+            <textarea name="home_address"></textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Mailing Address</label>
+            <textarea name="mailing_address"></textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Medical Information</label>
+            <textarea name="medical_info"></textarea>
+        </div>
+
+        <div class="mb-20">
+            <label>Emergency Contact Number</label>
+            <input name="emergency_contact">
+        </div>
+
+        <h3>Guardian 1</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>Full Name</label>
+                <input name="guardian1_name">
+            </div>
+
+            <div>
+                <label>Relationship to Student</label>
+                <input name="guardian1_relationship">
+            </div>
+
+            <div>
+                <label>Phone Number</label>
+                <input name="guardian1_phone">
+            </div>
+
+            <div>
+                <label>WhatsApp Number</label>
+                <input name="guardian1_whatsapp">
+            </div>
+
+            <div>
+                <label>Email Address</label>
+                <input name="guardian1_email">
+            </div>
+        </div>
+
+        <h3>Guardian 2</h3>
+        <div class="grid mb-20">
+            <div>
+                <label>Full Name</label>
+                <input name="guardian2_name">
+            </div>
+
+            <div>
+                <label>Relationship to Student</label>
+                <input name="guardian2_relationship">
+            </div>
+
+            <div>
+                <label>Phone Number</label>
+                <input name="guardian2_phone">
+            </div>
+
+            <div>
+                <label>WhatsApp Number</label>
+                <input name="guardian2_whatsapp">
+            </div>
+
+            <div>
+                <label>Email Address</label>
+                <input name="guardian2_email">
+            </div>
+        </div>
+<h3>Fees Setup For Current Academic Year</h3>
+
+<div class="grid mb-20">
+    <div>
+        <label>Academic Year</label>
+        <input type="text" name="academic_year" placeholder="Example: 2026" required>
+    </div>
+
+    <div>
+        <label>Term 1 Fee</label>
+        <input type="number" step="0.01" name="term1_fee" required>
+    </div>
+
+    <div>
+        <label>Term 2 Fee</label>
+        <input type="number" step="0.01" name="term2_fee" required>
+    </div>
+
+    <div>
+        <label>Term 3 Fee</label>
+        <input type="number" step="0.01" name="term3_fee" required>
+    </div>
+</div>
+        <button type="submit" class="btn">Register Student</button>
+    </form>
+</div>
+{% endblock %}

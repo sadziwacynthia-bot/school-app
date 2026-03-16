@@ -1,30 +1,125 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Fees</title>
-</head>
-<body>
-    <h2>All Student Fees</h2>
-    <a href="/add_fee">Add Fee</a><br><br>
-    <table border="1" cellpadding="5">
-        <tr>
-            <th>Student</th>
-            <th>Class</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Due Date</th>
-        </tr>
-        {% for f in fees %}
-        <tr>
-            <td>{{ f[1] }} {{ f[2] }}</td>
-            <td>{{ f[3] }}</td>
-            <td>${{ f[4] }}</td>
-            <td>{{ f[5] }}</td>
-            <td>{{ f[6] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <a href="/">Back to Home</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Fees{% endblock %}
+{% block page_title %}Fees Management{% endblock %}
+
+{% block content %}
+
+<div class="content-card mb-20">
+    <form method="GET" action="/fees">
+        <div class="grid">
+            <div>
+                <label>Select Class</label>
+                <select name="class_name" required>
+                    <option value="">Choose class</option>
+                    {% for class_item in classes %}
+                        <option value="{{ class_item.class_name }}"
+                            {% if selected_class == class_item.class_name %}selected{% endif %}>
+                            {{ class_item.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label>Academic Year</label>
+                <input type="text" name="academic_year" value="{{ selected_year or '' }}" placeholder="Example: 2026" required>
+            </div>
+
+            <div style="display:flex; align-items:end;">
+                <button type="submit" class="btn">Load Fees</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if fee_records %}
+    {% for fee in fee_records %}
+    <div class="content-card mb-20">
+        <h3>{{ fee.first_name }} {{ fee.last_name }}</h3>
+        <p><strong>Student Number:</strong> {{ fee.student_number }}</p>
+        <p><strong>Class:</strong> {{ fee.class_name }}</p>
+        <p><strong>Academic Year:</strong> {{ fee.academic_year }}</p>
+
+        <form method="POST" action="/update_fees">
+            <input type="hidden" name="fee_id" value="{{ fee.id }}">
+            <input type="hidden" name="selected_class" value="{{ selected_class }}">
+            <input type="hidden" name="selected_year" value="{{ selected_year }}">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Term</th>
+                        <th>Fee</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Term 1</td>
+                        <td>
+                            <input type="number" step="0.01" name="term1_fee" value="{{ fee.term1_fee or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="term1_paid" value="{{ fee.term1_paid or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="{{ fee.term1_balance or 0 }}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Term 2</td>
+                        <td>
+                            <input type="number" step="0.01" name="term2_fee" value="{{ fee.term2_fee or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="term2_paid" value="{{ fee.term2_paid or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="{{ fee.term2_balance or 0 }}" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Term 3</td>
+                        <td>
+                            <input type="number" step="0.01" name="term3_fee" value="{{ fee.term3_fee or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="term3_paid" value="{{ fee.term3_paid or 0 }}" required>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="{{ fee.term3_balance or 0 }}" readonly>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="grid mb-20" style="margin-top:20px;">
+                <div>
+                    <label>Total Fee</label>
+                    <input type="number" step="0.01" value="{{ fee.total_fee or 0 }}" readonly>
+                </div>
+
+                <div>
+                    <label>Total Paid</label>
+                    <input type="number" step="0.01" value="{{ fee.total_paid or 0 }}" readonly>
+                </div>
+
+                <div>
+                    <label>Total Balance</label>
+                    <input type="number" step="0.01" value="{{ fee.total_balance or 0 }}" readonly>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Update Fees</button>
+        </form>
+    </div>
+    {% endfor %}
+{% elif selected_class and selected_year %}
+    <div class="empty-box">No fee records found for this class and year.</div>
+{% else %}
+    <div class="empty-box">Choose a class and academic year to view fees.</div>
+{% endif %}
+
+{% endblock %}

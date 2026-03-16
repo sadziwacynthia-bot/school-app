@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block content %}
+
+<div class="content-card mb-20">
+    <h2>{{ student.first_name }} {{ student.last_name }}</h2>
+<div style="margin-bottom:20px;">
+    <a href="/edit_student/{{ student.id }}" class="btn">Edit Student</a>
+</div>
+    <div class="grid">
+        <div>
+            <label>Student Number</label>
+            <input type="text" value="{{ student.student_number }}" readonly>
+        </div>
+
+        <div>
+            <label>Class</label>
+            <input type="text" value="{{ student.class_name }}" readonly>
+        </div>
+
+        <div>
+            <label>Gender</label>
+            <input type="text" value="{{ student.gender }}" readonly>
+        </div>
+
+        <div>
+            <label>Date of Birth</label>
+            <input type="text" value="{{ student.birthday }}" readonly>
+        </div>
+
+        <div>
+            <label>Enrollment Date</label>
+            <input type="text" value="{{ student.enrollment_date }}" readonly>
+        </div>
+
+        <div>
+            <label>Expected Leaving Year</label>
+            <input type="text" value="{{ student.leaving_year }}" readonly>
+        </div>
+
+        <div>
+            <label>Student Phone</label>
+            <input type="text" value="{{ student.student_phone }}" readonly>
+        </div>
+
+        <div>
+            <label>Emergency Contact</label>
+            <input type="text" value="{{ student.emergency_contact }}" readonly>
+        </div>
+    </div>
+
+    <div style="margin-top:20px;">
+        <label>Home Address</label>
+        <textarea readonly>{{ student.home_address }}</textarea>
+    </div>
+
+    <div style="margin-top:20px;">
+        <label>Mailing Address</label>
+        <textarea readonly>{{ student.mailing_address }}</textarea>
+    </div>
+
+    <div style="margin-top:20px;">
+        <label>Medical Information</label>
+        <textarea readonly>{{ student.medical_info }}</textarea>
+    </div>
+</div>
+
+<div class="content-card mb-20">
+    <h3>Guardian 1</h3>
+
+    <div class="grid">
+        <div>
+            <label>Full Name</label>
+            <input type="text" value="{{ student.guardian1_name }}" readonly>
+        </div>
+
+        <div>
+            <label>Relationship</label>
+            <input type="text" value="{{ student.guardian1_relationship }}" readonly>
+        </div>
+
+        <div>
+            <label>Phone</label>
+            <input type="text" value="{{ student.guardian1_phone }}" readonly>
+        </div>
+
+        <div>
+            <label>WhatsApp</label>
+            <input type="text" value="{{ student.guardian1_whatsapp }}" readonly>
+        </div>
+
+        <div>
+            <label>Email</label>
+            <input type="text" value="{{ student.guardian1_email }}" readonly>
+        </div>
+    </div>
+</div>
+
+<div class="content-card mb-20">
+    <h3>Guardian 2</h3>
+
+    <div class="grid">
+        <div>
+            <label>Full Name</label>
+            <input type="text" value="{{ student.guardian2_name }}" readonly>
+        </div>
+
+        <div>
+            <label>Relationship</label>
+            <input type="text" value="{{ student.guardian2_relationship }}" readonly>
+        </div>
+
+        <div>
+            <label>Phone</label>
+            <input type="text" value="{{ student.guardian2_phone }}" readonly>
+        </div>
+
+        <div>
+            <label>WhatsApp</label>
+            <input type="text" value="{{ student.guardian2_whatsapp }}" readonly>
+        </div>
+
+        <div>
+            <label>Email</label>
+            <input type="text" value="{{ student.guardian2_email }}" readonly>
+        </div>
+    </div>
+</div>
+
+<div class="content-card mb-20">
+    <h3>Fees History</h3>
+
+    {% if fee_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Academic Year</th>
+                <th>Term 1 Balance</th>
+                <th>Term 2 Balance</th>
+                <th>Term 3 Balance</th>
+                <th>Total Fee</th>
+                <th>Total Paid</th>
+                <th>Total Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fee in fee_records %}
+            <tr>
+                <td>{{ fee.academic_year }}</td>
+                <td>${{ "%.2f"|format(fee.term1_balance or 0) }}</td>
+                <td>${{ "%.2f"|format(fee.term2_balance or 0) }}</td>
+                <td>${{ "%.2f"|format(fee.term3_balance or 0) }}</td>
+                <td>${{ "%.2f"|format(fee.total_fee or 0) }}</td>
+                <td>${{ "%.2f"|format(fee.total_paid or 0) }}</td>
+                <td>${{ "%.2f"|format(fee.total_balance or 0) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-box">No fees records found for this student.</div>
+    {% endif %}
+</div>
+
+<div class="content-card">
+    <h3>Attendance History</h3>
+
+    {% if attendance_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.date }}</td>
+                <td>{{ record.class_name }}</td>
+                <td>{{ record.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-box">No attendance records found for this student.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

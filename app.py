@@ -1,175 +1,591 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
-from urllib.parse import unquote
-import os
-from datetime import date as today
+import random
+import string
 
 app = Flask(__name__)
+app.secret_key = "school_secret_key"
 
-# -----------------------------
-# Database connection
-# -----------------------------
+
+# DATABASE CONNECTION
 def get_db():
-    return sqlite3.connect("school.db")
+    conn = sqlite3.connect("school.db")
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# -----------------------------
-# Home page
-# -----------------------------
+
+# GENERATE STUDENT NUMBER
+def generate_student_number():
+    letters = ''.join(random.choices(string.ascii_uppercase, k=2))
+    numbers = ''.join(random.choices(string.digits, k=4))
+    return f"STU{letters}{numbers}"
+
+
+# DASHBOARD
 @app.route("/")
-def home():
-    return render_template("index.html")
+def dashboard():
+    conn = get_db()
+    cursor = conn.cursor()
 
-# -----------------------------
-# Register student + fee
-# -----------------------------
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        first_name = request.form["first_name"]
-        last_name = request.form["last_name"]
-        email = request.form["email"]
-        class_name = request.form["class_name"]
-        date_of_birth = request.form["date_of_birth"]
+    total_students = cursor.execute("SELECT COUNT(*) FROM students").fetchone()[0]
 
-        fee_amount = request.form.get("fee_amount")
-        fee_due_date = request.form.get("fee_due_date")
-        fee_status = request.form.get("fee_status")
+    total_classes = cursor.execute("""
+        SELECT COUNT(DISTINCT class_name)
+        FROM students
+        WHERE class_name IS NOT NULL AND class_name != ''
+    """).fetchone()[0]
 
-        db = get_db()
-        cursor = db.cursor()
+    total_fees = cursor.execute("""
+        SELECT COALESCE(SUM(total_fee), 0) FROM fees
+    """).fetchone()[0]
 
-        # Insert student
-        cursor.execute("""
-            INSERT INTO students (first_name, last_name, email, class_name, date_of_birth)
-            VALUES (?, ?, ?, ?, ?)
-        """, (first_name, last_name, email, class_name, date_of_birth))
-        student_id = cursor.lastrowid
+    total_paid = cursor.execute("""
+        SELECT COALESCE(SUM(total_paid), 0) FROM fees
+    """).fetchone()[0]
 
-        # Insert fee if provided
-        if fee_amount and fee_due_date and fee_status:
-            cursor.execute("""
-                INSERT INTO fees (student_id, amount, status, due_date)
-                VALUES (?, ?, ?, ?)
-            """, (student_id, float(fee_amount), fee_status, fee_due_date))
+    total_balance = cursor.execute("""
+        SELECT COALESCE(SUM(total_balance), 0) FROM fees
+    """).fetchone()[0]
 
-        db.commit()
-        db.close()
-        return redirect("/students")
+    recent_students = cursor.execute("""
+        SELECT student_number, first_name, last_name, class_name
+        FROM students
+        ORDER BY id DESC
+        LIMIT 5
+    """).fetchall()
 
-    return render_template("register.html")
+    conn.close()
 
-# -----------------------------
-# View all students
-# -----------------------------
+    return render_template(
+        "dashboard.html",
+        total_students=total_students,
+        total_classes=total_classes,
+        total_fees=total_fees,
+        total_paid=total_paid,
+        total_balance=total_balance,
+        recent_students=recent_students
+    )
+
+
+# ADD STUDENT PAGE
+@app.route("/add_student")
+def add_student_page():
+    return render_template("add_student.html")
+
+
+# SAVE STUDENT
+@app.route("/save_student", methods=["POST"])
+def save_student():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    first_name = request.form["first_name"]
+    last_name = request.form["last_name"]
+    birthday = request.form["birthday"]
+    gender = request.form["gender"]
+    enrollment_date = request.form["enrollment_date"]
+    leaving_year = request.form["leaving_year"]
+    class_name = request.form["class_name"]
+    home_address = request.form["home_address"]
+    mailing_address = request.form["mailing_address"]
+    student_phone = request.form["student_phone"]
+    medical_info = request.form["medical_info"]
+    emergency_contact = request.form["emergency_contact"]
+    guardian1_name = request.form["guardian1_name"]
+    guardian1_relationship = request.form["guardian1_relationship"]
+    guardian1_phone = request.form["guardian1_phone"]
+    guardian1_whatsapp = request.form["guardian1_whatsapp"]
+    guardian1_email = request.form["guardian1_email"]
+    guardian2_name = request.form["guardian2_name"]
+    guardian2_relationship = request.form["guardian2_relationship"]
+    guardian2_phone = request.form["guardian2_phone"]
+    guardian2_whatsapp = request.form["guardian2_whatsapp"]
+    guardian2_email = request.form["guardian2_email"]
+
+    academic_year = request.form["academic_year"]
+    term1_fee = float(request.form["term1_fee"])
+    term2_fee = float(request.form["term2_fee"])
+    term3_fee = float(request.form["term3_fee"])
+
+    student_number = generate_student_number()
+
+    cursor.execute("""
+        INSERT INTO students (
+            student_number, first_name, last_name, birthday, gender,
+            enrollment_date, leaving_year, class_name, home_address,
+            mailing_address, student_phone, medical_info, emergency_contact,
+            guardian1_name, guardian1_relationship, guardian1_phone,
+            guardian1_whatsapp, guardian1_email, guardian2_name,
+            guardian2_relationship, guardian2_phone, guardian2_whatsapp,
+            guardian2_email
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        student_number, first_name, last_name, birthday, gender,
+        enrollment_date, leaving_year, class_name, home_address,
+        mailing_address, student_phone, medical_info, emergency_contact,
+        guardian1_name, guardian1_relationship, guardian1_phone,
+        guardian1_whatsapp, guardian1_email, guardian2_name,
+        guardian2_relationship, guardian2_phone, guardian2_whatsapp,
+        guardian2_email
+    ))
+
+    student_id = cursor.lastrowid
+
+    term1_paid = 0
+    term1_balance = term1_fee
+
+    term2_paid = 0
+    term2_balance = term2_fee
+
+    term3_paid = 0
+    term3_balance = term3_fee
+
+    total_fee = term1_fee + term2_fee + term3_fee
+    total_paid = 0
+    total_balance = total_fee
+
+    cursor.execute("""
+        INSERT INTO fees (
+            student_id, academic_year,
+            term1_fee, term1_paid, term1_balance,
+            term2_fee, term2_paid, term2_balance,
+            term3_fee, term3_paid, term3_balance,
+            total_fee, total_paid, total_balance
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        student_id, academic_year,
+        term1_fee, term1_paid, term1_balance,
+        term2_fee, term2_paid, term2_balance,
+        term3_fee, term3_paid, term3_balance,
+        total_fee, total_paid, total_balance
+    ))
+
+    conn.commit()
+    conn.close()
+
+    flash("Student registered successfully!", "success")
+    return redirect("/students")
+
+
+# VIEW STUDENTS
 @app.route("/students")
 def students():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM students ORDER BY class_name, last_name")
-    students = cursor.fetchall()
-    db.close()
-    return render_template("students.html", students=students)
+    conn = get_db()
+    cursor = conn.cursor()
 
-# -----------------------------
-# View all classes
-# -----------------------------
+    search = request.args.get("search", "").strip()
+
+    if search:
+        student_records = cursor.execute("""
+            SELECT *
+            FROM students
+            WHERE first_name LIKE ? OR last_name LIKE ? OR student_number LIKE ? OR class_name LIKE ?
+            ORDER BY id DESC
+        """, (f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%")).fetchall()
+    else:
+        student_records = cursor.execute("""
+            SELECT *
+            FROM students
+            ORDER BY id DESC
+        """).fetchall()
+
+    conn.close()
+    return render_template("students.html", student_records=student_records, search=search)
+
+@app.route("/student/<int:student_id>")
+def student_profile(student_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    student = cursor.execute("""
+        SELECT *
+        FROM students
+        WHERE id = ?
+    """, (student_id,)).fetchone()
+
+    fee_records = cursor.execute("""
+        SELECT *
+        FROM fees
+        WHERE student_id = ?
+        ORDER BY academic_year DESC
+    """, (student_id,)).fetchall()
+
+    attendance_records = cursor.execute("""
+        SELECT *
+        FROM attendance
+        WHERE student_id = ?
+        ORDER BY date DESC
+    """, (student_id,)).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "student_profile.html",
+        student=student,
+        fee_records=fee_records,
+        attendance_records=attendance_records
+    )
+@app.route("/edit_student/<int:student_id>")
+def edit_student(student_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    student = cursor.execute("""
+        SELECT *
+        FROM students
+        WHERE id = ?
+    """, (student_id,)).fetchone()
+
+    conn.close()
+
+    return render_template("edit_student.html", student=student)
+@app.route("/update_student/<int:student_id>", methods=["POST"])
+def update_student(student_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    first_name = request.form["first_name"]
+    last_name = request.form["last_name"]
+    birthday = request.form["birthday"]
+    gender = request.form["gender"]
+    enrollment_date = request.form["enrollment_date"]
+    leaving_year = request.form["leaving_year"]
+    class_name = request.form["class_name"]
+    home_address = request.form["home_address"]
+    mailing_address = request.form["mailing_address"]
+    student_phone = request.form["student_phone"]
+    medical_info = request.form["medical_info"]
+    emergency_contact = request.form["emergency_contact"]
+    guardian1_name = request.form["guardian1_name"]
+    guardian1_relationship = request.form["guardian1_relationship"]
+    guardian1_phone = request.form["guardian1_phone"]
+    guardian1_whatsapp = request.form["guardian1_whatsapp"]
+    guardian1_email = request.form["guardian1_email"]
+    guardian2_name = request.form["guardian2_name"]
+    guardian2_relationship = request.form["guardian2_relationship"]
+    guardian2_phone = request.form["guardian2_phone"]
+    guardian2_whatsapp = request.form["guardian2_whatsapp"]
+    guardian2_email = request.form["guardian2_email"]
+
+    cursor.execute("""
+        UPDATE students
+        SET
+            first_name = ?,
+            last_name = ?,
+            birthday = ?,
+            gender = ?,
+            enrollment_date = ?,
+            leaving_year = ?,
+            class_name = ?,
+            home_address = ?,
+            mailing_address = ?,
+            student_phone = ?,
+            medical_info = ?,
+            emergency_contact = ?,
+            guardian1_name = ?,
+            guardian1_relationship = ?,
+            guardian1_phone = ?,
+            guardian1_whatsapp = ?,
+            guardian1_email = ?,
+            guardian2_name = ?,
+            guardian2_relationship = ?,
+            guardian2_phone = ?,
+            guardian2_whatsapp = ?,
+            guardian2_email = ?
+        WHERE id = ?
+    """, (
+        first_name, last_name, birthday, gender, enrollment_date,
+        leaving_year, class_name, home_address, mailing_address,
+        student_phone, medical_info, emergency_contact,
+        guardian1_name, guardian1_relationship, guardian1_phone,
+        guardian1_whatsapp, guardian1_email,
+        guardian2_name, guardian2_relationship, guardian2_phone,
+        guardian2_whatsapp, guardian2_email,
+        student_id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    flash("Student updated successfully!", "success")
+    return redirect(f"/student/{student_id}")
+
+# CLASSES PAGE
 @app.route("/classes")
 def classes():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT class_name, COUNT(*) as student_count
-        FROM students
-        GROUP BY class_name
-        ORDER BY class_name
-    """)
-    classes = cursor.fetchall()
-    db.close()
-    return render_template("classes.html", classes=classes)
+    conn = get_db()
+    cursor = conn.cursor()
 
-# -----------------------------
-# View students in a class
-# -----------------------------
+    class_records = cursor.execute("""
+        SELECT class_name, COUNT(*) as total_students
+        FROM students
+        WHERE class_name IS NOT NULL AND class_name != ''
+        GROUP BY class_name
+        ORDER BY class_name ASC
+    """).fetchall()
+
+    conn.close()
+    return render_template("classes.html", class_records=class_records)
+
+
+# SINGLE CLASS PAGE
 @app.route("/class/<class_name>")
 def class_students(class_name):
-    class_name = unquote(class_name)
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM students WHERE class_name = ? ORDER BY last_name", (class_name,))
-    students = cursor.fetchall()
-    db.close()
-    return render_template("class_students.html", students=students, class_name=class_name)
+    conn = get_db()
+    cursor = conn.cursor()
 
-# -----------------------------
-# Attendance
-# -----------------------------
-@app.route("/attendance/<class_name>", methods=["GET", "POST"])
-def attendance(class_name):
-    class_name = unquote(class_name)
-    db = get_db()
-    cursor = db.cursor()
+    class_students_records = cursor.execute("""
+        SELECT *
+        FROM students
+        WHERE class_name = ?
+        ORDER BY first_name ASC, last_name ASC
+    """, (class_name,)).fetchall()
 
-    if request.method == "POST":
-        for student_id, status in request.form.items():
-            cursor.execute("""
-                INSERT INTO attendance (student_id, date, status)
-                VALUES (?, ?, ?)
-            """, (student_id, today().isoformat(), status))
-        db.commit()
-        db.close()
-        return redirect(f"/class/{class_name}")
+    conn.close()
+    return render_template(
+        "class_students.html",
+        students=class_students_records,
+        class_name=class_name
+    )
 
-    cursor.execute("SELECT * FROM students WHERE class_name = ? ORDER BY last_name", (class_name,))
-    students = cursor.fetchall()
-    db.close()
-    return render_template("attendance.html", students=students, class_name=class_name)
 
-# -----------------------------
-# Fees
-# -----------------------------
-@app.route("/fees")
+# FEES PAGE - FILTER BY CLASS AND YEAR
+@app.route("/fees", methods=["GET"])
 def fees():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT f.id, s.first_name, s.last_name, s.class_name, f.amount, f.status, f.due_date
-        FROM fees f
-        JOIN students s ON f.student_id = s.id
-        ORDER BY s.class_name, s.last_name
-    """)
-    fees_list = cursor.fetchall()
-    db.close()
-    return render_template("fees.html", fees=fees_list)
+    conn = get_db()
+    cursor = conn.cursor()
 
-@app.route("/add_fee", methods=["GET", "POST"])
-def add_fee():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM students ORDER BY class_name, last_name")
-    students = cursor.fetchall()
+    classes = cursor.execute("""
+        SELECT DISTINCT class_name
+        FROM students
+        WHERE class_name IS NOT NULL AND class_name != ''
+        ORDER BY class_name ASC
+    """).fetchall()
+
+    selected_class = request.args.get("class_name", "")
+    selected_year = request.args.get("academic_year", "")
+
+    fee_records = []
+
+    if selected_class and selected_year:
+        fee_records = cursor.execute("""
+            SELECT
+                fees.*,
+                students.student_number,
+                students.first_name,
+                students.last_name,
+                students.class_name
+            FROM fees
+            JOIN students ON fees.student_id = students.id
+            WHERE students.class_name = ? AND fees.academic_year = ?
+            ORDER BY students.first_name ASC, students.last_name ASC
+        """, (selected_class, selected_year)).fetchall()
+
+    conn.close()
+    return render_template(
+        "fees.html",
+        classes=classes,
+        fee_records=fee_records,
+        selected_class=selected_class,
+        selected_year=selected_year
+    )
+
+
+# UPDATE FEES
+@app.route("/update_fees", methods=["POST"])
+def update_fees():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    fee_id = request.form["fee_id"]
+    selected_class = request.form["selected_class"]
+    selected_year = request.form["selected_year"]
+
+    term1_fee = float(request.form["term1_fee"])
+    term1_paid = float(request.form["term1_paid"])
+    term1_balance = term1_fee - term1_paid
+
+    term2_fee = float(request.form["term2_fee"])
+    term2_paid = float(request.form["term2_paid"])
+    term2_balance = term2_fee - term2_paid
+
+    term3_fee = float(request.form["term3_fee"])
+    term3_paid = float(request.form["term3_paid"])
+    term3_balance = term3_fee - term3_paid
+
+    total_fee = term1_fee + term2_fee + term3_fee
+    total_paid = term1_paid + term2_paid + term3_paid
+    total_balance = term1_balance + term2_balance + term3_balance
+
+    cursor.execute("""
+        UPDATE fees
+        SET
+            term1_fee = ?, term1_paid = ?, term1_balance = ?,
+            term2_fee = ?, term2_paid = ?, term2_balance = ?,
+            term3_fee = ?, term3_paid = ?, term3_balance = ?,
+            total_fee = ?, total_paid = ?, total_balance = ?
+        WHERE id = ?
+    """, (
+        term1_fee, term1_paid, term1_balance,
+        term2_fee, term2_paid, term2_balance,
+        term3_fee, term3_paid, term3_balance,
+        total_fee, total_paid, total_balance,
+        fee_id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    flash("Fees updated successfully!", "success")
+    return redirect(f"/fees?class_name={selected_class}&academic_year={selected_year}")
+
+@app.route("/generate_fees", methods=["GET", "POST"])
+def generate_fees():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    classes = cursor.execute("""
+        SELECT DISTINCT class_name
+        FROM students
+        WHERE class_name IS NOT NULL AND class_name != ''
+        ORDER BY class_name ASC
+    """).fetchall()
 
     if request.method == "POST":
-        student_id = request.form["student_id"]
-        amount = request.form["amount"]
-        due_date = request.form["due_date"]
-        status = request.form["status"]
+        class_name = request.form["class_name"]
+        academic_year = request.form["academic_year"]
+        term1_fee = float(request.form["term1_fee"])
+        term2_fee = float(request.form["term2_fee"])
+        term3_fee = float(request.form["term3_fee"])
+
+        students_in_class = cursor.execute("""
+            SELECT id
+            FROM students
+            WHERE class_name = ?
+        """, (class_name,)).fetchall()
+
+        created_count = 0
+
+        for student in students_in_class:
+            student_id = student["id"]
+
+            existing_record = cursor.execute("""
+                SELECT id
+                FROM fees
+                WHERE student_id = ? AND academic_year = ?
+            """, (student_id, academic_year)).fetchone()
+
+            if existing_record:
+                continue
+
+            term1_paid = 0
+            term1_balance = term1_fee
+
+            term2_paid = 0
+            term2_balance = term2_fee
+
+            term3_paid = 0
+            term3_balance = term3_fee
+
+            total_fee = term1_fee + term2_fee + term3_fee
+            total_paid = 0
+            total_balance = total_fee
+
+            cursor.execute("""
+                INSERT INTO fees (
+                    student_id, academic_year,
+                    term1_fee, term1_paid, term1_balance,
+                    term2_fee, term2_paid, term2_balance,
+                    term3_fee, term3_paid, term3_balance,
+                    total_fee, total_paid, total_balance
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                student_id, academic_year,
+                term1_fee, term1_paid, term1_balance,
+                term2_fee, term2_paid, term2_balance,
+                term3_fee, term3_paid, term3_balance,
+                total_fee, total_paid, total_balance
+            ))
+
+            created_count += 1
+
+        conn.commit()
+        conn.close()
+
+        flash(f"{created_count} fee record(s) generated for {class_name} - {academic_year}.", "success")
+        return redirect(url_for("generate_fees"))
+
+    conn.close()
+    return render_template("generate_fees.html", classes=classes)
+
+# ATTENDANCE PAGE
+@app.route("/attendance", methods=["GET"])
+def attendance():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    classes = cursor.execute("""
+        SELECT DISTINCT class_name
+        FROM students
+        WHERE class_name IS NOT NULL AND class_name != ''
+        ORDER BY class_name ASC
+    """).fetchall()
+
+    selected_class = request.args.get("class_name", "")
+    attendance_date = request.args.get("date", "")
+
+    attendance_students = []
+    if selected_class:
+        attendance_students = cursor.execute("""
+            SELECT id, student_number, first_name, last_name, class_name
+            FROM students
+            WHERE class_name = ?
+            ORDER BY first_name ASC, last_name ASC
+        """, (selected_class,)).fetchall()
+
+    conn.close()
+    return render_template(
+        "attendance.html",
+        classes=classes,
+        students=attendance_students,
+        selected_class=selected_class,
+        attendance_date=attendance_date
+    )
+
+
+# SAVE ATTENDANCE
+@app.route("/save_attendance", methods=["POST"])
+def save_attendance():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    class_name = request.form["class_name"]
+    attendance_date = request.form["attendance_date"]
+
+    cursor.execute("""
+        DELETE FROM attendance
+        WHERE class_name = ? AND date = ?
+    """, (class_name, attendance_date))
+
+    student_ids = request.form.getlist("student_id")
+
+    for student_id in student_ids:
+        status = request.form.get(f"status_{student_id}", "Present")
 
         cursor.execute("""
-            INSERT INTO fees (student_id, amount, status, due_date)
+            INSERT INTO attendance (student_id, class_name, date, status)
             VALUES (?, ?, ?, ?)
-        """, (student_id, float(amount), status, due_date))
-        db.commit()
-        db.close()
-        return redirect("/fees")
+        """, (student_id, class_name, attendance_date, status))
 
-    db.close()
-    return render_template("add_fee.html", students=students)
+    conn.commit()
+    conn.close()
 
-# -----------------------------
-# Run the app (Render ready)
-# -----------------------------
+    flash("Attendance saved successfully!", "success")
+    return redirect(f"/attendance?class_name={class_name}&date={attendance_date}")
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port, debug=True)
-
-
+    app.run(debug=True)
