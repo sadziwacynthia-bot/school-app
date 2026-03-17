@@ -1,5 +1,5 @@
 import sqlite3
-
+from werkzeug.security import generate_password_hash
 conn = sqlite3.connect("school.db")
 cursor = conn.cursor()
 
@@ -72,7 +72,44 @@ CREATE TABLE IF NOT EXISTS attendance (
     FOREIGN KEY (student_id) REFERENCES students(id)
 )
 """)
+# USERS TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL
+)
+""")
 
+# TEACHER CLASSES TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS teacher_classes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    class_name TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+)
+""")
+
+# PARENT-STUDENT LINK TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS parent_students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    student_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (student_id) REFERENCES students(id)
+)
+""")
+# DEFAULT DIRECTOR ACCOUNT
+director_password = generate_password_hash("admin123")
+
+cursor.execute("""
+INSERT OR IGNORE INTO users (full_name, username, password, role)
+VALUES (?, ?, ?, ?)
+""", ("System Director", "director", director_password, "director"))
 conn.commit()
 conn.close()
 

@@ -7,8 +7,12 @@
 
 <div class="content-card mb-20">
     <h2>{{ student.first_name }} {{ student.last_name }}</h2>
-<div style="margin-bottom:20px;">
+<div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
     <a href="/edit_student/{{ student.id }}" class="btn">Edit Student</a>
+
+    <form method="POST" action="/delete_student/{{ student.id }}" onsubmit="return confirm('Are you sure you want to delete this student?');">
+        <button type="submit" class="btn" style="background:#dc2626;">Delete Student</button>
+    </form>
 </div>
     <div class="grid">
         <div>

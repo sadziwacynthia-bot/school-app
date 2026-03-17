@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+{% block page_title %}System Users{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:20px;">
+    <a href="/add_user" class="btn">+ Add User</a>
+</div>
+
+<div class="content-card">
+    {% if user_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in user_records %}
+            <tr>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.role }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-box">No users found.</div>
+    {% endif %}
+</div>
+
+{% endblock %}
