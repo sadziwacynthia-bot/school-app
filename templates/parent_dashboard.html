@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard{% endblock %}
+{% block page_title %}Parent Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="content-card mb-20">
+    <h2>Welcome, {{ parent_name }}</h2>
+    <p>Here you can view your child’s information, attendance, and fees.</p>
+</div>
+
+{% if children_data %}
+    {% for child in children_data %}
+    <div class="content-card mb-20">
+        <h3>{{ child.first_name }} {{ child.last_name }}</h3>
+
+        <div class="grid mb-20">
+            <div>
+                <label>Student Number</label>
+                <input type="text" value="{{ child.student_number }}" readonly>
+            </div>
+
+            <div>
+                <label>Class</label>
+                <input type="text" value="{{ child.class_name }}" readonly>
+            </div>
+        </div>
+
+        <h4>Latest Fees Summary</h4>
+        {% if child.fee %}
+        <div class="grid mb-20">
+            <div>
+                <label>Academic Year</label>
+                <input type="text" value="{{ child.fee.academic_year }}" readonly>
+            </div>
+
+            <div>
+                <label>Total Fee</label>
+                <input type="text" value="${{ '%.2f'|format(child.fee.total_fee or 0) }}" readonly>
+            </div>
+
+            <div>
+                <label>Total Paid</label>
+                <input type="text" value="${{ '%.2f'|format(child.fee.total_paid or 0) }}" readonly>
+            </div>
+
+            <div>
+                <label>Total Balance</label>
+                <input type="text" value="${{ '%.2f'|format(child.fee.total_balance or 0) }}" readonly>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-box mb-20">No fee records found.</div>
+        {% endif %}
+
+        <h4>Attendance Summary</h4>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Present</div>
+                <div class="stat-value">{{ child.attendance.present_count or 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Absent</div>
+                <div class="stat-value">{{ child.attendance.absent_count or 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Late</div>
+                <div class="stat-value">{{ child.attendance.late_count or 0 }}</div>
+            </div>
+        </div>
+<h4 style="margin-top:20px;">Results Summary</h4>
+<h4 style="margin-top:20px;">Full Results</h4>
+
+{% if child.result_records %}
+<table>
+    <thead>
+        <tr>
+            <th>Academic Year</th>
+            <th>Term</th>
+            <th>Subject</th>
+            <th>Mark</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in child.result_records %}
+        <tr>
+            <td>{{ result.academic_year }}</td>
+            <td>{{ result.term }}</td>
+            <td>{{ result.subject_name }}</td>
+            <td>{{ result.mark }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-box mb-20">No results found for this child.</div>
+{% endif %}
+<div class="grid mb-20">
+    <div>
+        <label>Total Subjects Recorded</label>
+        <input type="text" value="{{ child.results.total_subjects or 0 }}" readonly>
+    </div>
+
+    <div>
+        <label>Average Mark</label>
+        <input type="text" value="{{ '%.2f'|format(child.results.average_mark or 0) }}" readonly>
+    </div>
+</div>
+        <div style="margin-top:20px;">
+            <a href="/student/{{ child.id }}" class="btn">View Full Student Profile</a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-box">No student is linked to this parent account yet.</div>
+{% endif %}
+
+{% endblock %}

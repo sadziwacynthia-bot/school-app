@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Enter Results{% endblock %}
+{% block page_title %}Enter Results{% endblock %}
+
+{% block content %}
+
+<div class="content-card mb-20">
+    <form method="GET" action="/enter_results">
+        <div class="grid">
+            <div>
+                <label>Class</label>
+                <select name="class_name" required>
+                    <option value="">Choose class</option>
+                    {% for item in subject_options %}
+                    <option value="{{ item.class_name }}" {% if selected_class == item.class_name %}selected{% endif %}>
+                        {{ item.class_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label>Subject</label>
+                <select name="subject_name" required>
+                    <option value="">Choose subject</option>
+                    {% for item in subject_options %}
+                    <option value="{{ item.subject_name }}" {% if selected_subject == item.subject_name %}selected{% endif %}>
+                        {{ item.subject_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label>Term</label>
+                <select name="term" required>
+                    <option value="">Choose term</option>
+                    <option value="Term 1" {% if selected_term == "Term 1" %}selected{% endif %}>Term 1</option>
+                    <option value="Term 2" {% if selected_term == "Term 2" %}selected{% endif %}>Term 2</option>
+                    <option value="Term 3" {% if selected_term == "Term 3" %}selected{% endif %}>Term 3</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Academic Year</label>
+                <input type="text" name="academic_year" value="{{ selected_year or '' }}" placeholder="Example: 2026" required>
+            </div>
+
+            <div style="display:flex; align-items:end;">
+                <button type="submit" class="btn">Load Students</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if students and selected_class and selected_subject and selected_term and selected_year %}
+<div class="content-card">
+    <form method="POST" action="/enter_results">
+        <input type="hidden" name="class_name" value="{{ selected_class }}">
+        <input type="hidden" name="subject_name" value="{{ selected_subject }}">
+        <input type="hidden" name="term" value="{{ selected_term }}">
+        <input type="hidden" name="academic_year" value="{{ selected_year }}">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Number</th>
+                    <th>Student Name</th>
+                    <th>Mark</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.student_number }}</td>
+                    <td>{{ student.first_name }} {{ student.last_name }}</td>
+                    <td>
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        <input type="number" step="0.01" min="0" max="100" name="mark_{{ student.id }}" placeholder="Enter mark">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top:20px;">
+            <button type="submit" class="btn">Save Results</button>
+        </div>
+    </form>
+</div>
+{% elif selected_class and selected_subject and selected_term and selected_year %}
+<div class="empty-box">No students found for this class.</div>
+{% endif %}
+
+{% endblock %}

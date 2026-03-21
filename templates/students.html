@@ -4,31 +4,36 @@
 {% block page_title %}Students{% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <form method="GET" action="/students" class="mb-20">
+
+<div class="content-card mb-20">
+    <form method="GET" action="/students">
         <div class="grid">
             <div>
                 <label>Search Students</label>
                 <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by name, student number, or class">
             </div>
-            <div style="display:flex; align-items:end;">
+
+            <div style="display:flex; align-items:end; gap:10px;">
                 <button type="submit" class="btn">Search</button>
+                <a href="/students" class="btn" style="text-decoration:none;">Clear</a>
             </div>
         </div>
     </form>
+</div>
 
+<div class="content-card">
     {% if student_records %}
     <table>
-       <thead>
-    <tr>
-        <th>Student Number</th>
-        <th>Name</th>
-        <th>Class</th>
-        <th>Gender</th>
-        <th>Phone</th>
-        <th>Actions</th>
-    </tr>
-</thead>
+        <thead>
+            <tr>
+                <th>Student Number</th>
+                <th>Full Name</th>
+                <th>Class</th>
+                <th>Gender</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
         <tbody>
             {% for student in student_records %}
             <tr>
@@ -38,8 +43,8 @@
                 <td>{{ student.gender }}</td>
                 <td>{{ student.student_phone }}</td>
                 <td>
-    <a href="/student/{{ student.id }}" class="btn">View Profile</a>
-</td>
+                    <a href="/student/{{ student.id }}" class="btn">View Profile</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -48,4 +53,5 @@
     <div class="empty-box">No students found.</div>
     {% endif %}
 </div>
+
 {% endblock %}

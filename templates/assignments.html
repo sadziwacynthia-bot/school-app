@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Assignments{% endblock %}
+{% block page_title %}Assignments{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:20px;">
+    <a href="/add_assignment" class="btn">+ Add Assignment</a>
+</div>
+
+<div class="content-card">
+    {% if assignment_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Teacher</th>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Title</th>
+                <th>Due Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in assignment_records %}
+            <tr>
+                <td>{{ item.full_name }}</td>
+                <td>{{ item.class_name }}</td>
+                <td>{{ item.subject_name }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.due_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-box">No assignments yet.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -194,19 +194,43 @@
     <div class="layout">
         <div class="sidebar">
             <div class="brand">School System</div>
-            <div class="nav">
-                <a href="/">Dashboard</a>
-                <a href="/students">Students</a>
-                <a href="/add_student">Register Student</a>
-                <a href="/classes">Classes</a>
-                <a href="/attendance">Attendance</a>
-                <a href="/fees">Fees</a>
-                <a href="/generate_fees">Generate Fees</a>
-                <a href="/assign_teacher">Assign Teacher</a>
-                <a href="/assign_parent">Assign Parent</a>
-                <a href="/users">Users</a>
-                <a href="/logout">Logout</a>    
-            </div>
+          <div class="nav">
+    {% if session.get("role") in ["director", "admin"] %}
+        <a href="/">Dashboard</a>
+        <a href="/students">Students</a>
+        <a href="/add_student">Register Student</a>
+        <a href="/teachers">Teachers</a>
+        <a href="/register_teacher">Register Teacher</a>
+        <a href="/classes">Classes</a>
+        <a href="/attendance">Attendance</a>
+        <a href="/fees">Fees</a>
+        <a href="/generate_fees">Generate Fees</a>
+        <a href="/subjects">Subjects</a>
+        <a href="/assign_subject">Assign Subject</a>
+        <a href="/assignments">Assignments</a>
+        <a href="/users">Users</a>
+        <a href="/assign_teacher">Assign Teacher</a>
+        <a href="/assign_parent">Assign Parent</a>
+        <a href="/results">Results</a>
+        <a href="/enter_results">Enter Results</a>
+    {% endif %}
+
+    {% if session.get("role") == "teacher" %}
+        <a href="/">Dashboard</a>
+        <a href="/classes">Classes</a>
+        <a href="/attendance">Attendance</a>
+        <a href="/subjects">Subjects</a>
+        <a href="/assignments">Assignments</a>
+        <a href="/results">Results</a>
+        <a href="/enter_results">Enter Results</a>
+    {% endif %}
+
+    {% if session.get("role") == "parent" %}
+        <a href="/parent_dashboard">Dashboard</a>
+    {% endif %}
+
+    <a href="/logout">Logout</a>
+</div>
         </div>
 
         <div class="main">

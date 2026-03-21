@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Register Teacher{% endblock %}
+{% block page_title %}Register Teacher{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <form method="POST" action="/save_teacher">
+
+        <div class="grid mb-20">
+            <div>
+                <label>Full Name</label>
+                <input type="text" name="full_name" required>
+            </div>
+
+            <div>
+                <label>Phone Number</label>
+                <input type="text" name="phone">
+            </div>
+
+            <div>
+                <label>Email Address</label>
+                <input type="email" name="email">
+            </div>
+
+            <div>
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn">Register Teacher</button>
+    </form>
+</div>
+{% endblock %}
