@@ -4,6 +4,15 @@ from functools import wraps
 import sqlite3
 import random
 import string
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, flash
+
+app = Flask(__name__)
+app.secret_key = "your_secret_key"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "school.db")
 
 app = Flask(__name__)
 app.secret_key = "school_secret_key"
@@ -11,7 +20,7 @@ app.secret_key = "school_secret_key"
 
 # DATABASE CONNECTION
 def get_db():
-    conn = sqlite3.connect("school.db")
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -76,7 +85,89 @@ def roles_required(*allowed_roles):
 def generate_setup_code(length=6):
     characters = string.ascii_uppercase + string.digits
     return ''.join(random.choices(characters, k=length))
+def reset_database():
+    if os.path.exists(DATABASE):
+        os.remove(DATABASE)
 
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name TEXT NOT NULL,
+            last_name TEXT NOT NULL,
+            gender TEXT,
+            dob TEXT,
+            class_name TEXT
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS parents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            parent_name TEXT,
+            phone TEXT,
+            email TEXT,
+            relationship TEXT,
+            FOREIGN KEY (student_id) REFERENCES students(id)
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS classes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            subject_id INTEGER,
+            class_id INTEGER,
+            marks REAL,
+            term TEXT,
+            FOREIGN KEY (student_id) REFERENCES students(id),
+            FOREIGN KEY (subject_id) REFERENCES subjects(id),
+            FOREIGN KEY (class_id) REFERENCES classes(id)
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+def seed_data():
+    conn = get_db()
+    cur = conn.cursor()
+
+    classes = ["Form 1", "Form 2", "Form 3", "Form 4"]
+    subjects = ["Math", "English", "Science", "Biology", "History"]
+
+    for c in classes:
+        cur.execute("INSERT OR IGNORE INTO classes (class_name) VALUES (?)", (c,))
+
+    for s in subjects:
+        cur.execute("INSERT OR IGNORE INTO subjects (subject_name) VALUES (?)", (s,))
+
+    conn.commit()
+    conn.close()
+@app.route("/reset")
+def reset():
+    reset_database()
+    seed_data()
+    return "Database reset successfully." 
+@app.route("/check-db")
+def check_db():
+    return f"Database path: {DATABASE}"      
 # LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
