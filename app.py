@@ -506,89 +506,56 @@ def add_student():
 @login_required
 @roles_required("admin", "director")
 def save_student():
-    data = {key: request.form.get(key, "").strip() for key in request.form.keys()}
-    student_number = generate_student_number()
+    try:
+        data = {key: request.form.get(key, "").strip() for key in request.form.keys()}
 
-    conn = get_db()
-    cur = conn.cursor()
+        student_number = generate_student_number()
 
-    cur.execute("""
-        INSERT INTO students (
-            student_number, first_name, last_name, birthday, gender, enrollment_date,
-            leaving_year, class_name, home_address, mailing_address, student_phone,
-            medical_info, emergency_contact,
-            guardian1_name, guardian1_relationship, guardian1_phone, guardian1_whatsapp, guardian1_email,
-            guardian2_name, guardian2_relationship, guardian2_phone, guardian2_whatsapp, guardian2_email
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        student_number,
-        data.get("first_name"),
-        data.get("last_name"),
-        data.get("birthday"),
-        data.get("gender"),
-        data.get("enrollment_date"),
-        data.get("leaving_year"),
-        data.get("class_name"),
-        data.get("home_address"),
-        data.get("mailing_address"),
-        data.get("student_phone"),
-        data.get("medical_info"),
-        data.get("emergency_contact"),
-        data.get("guardian1_name"),
-        data.get("guardian1_relationship"),
-        data.get("guardian1_phone"),
-        data.get("guardian1_whatsapp"),
-        data.get("guardian1_email"),
-        data.get("guardian2_name"),
-        data.get("guardian2_relationship"),
-        data.get("guardian2_phone"),
-        data.get("guardian2_whatsapp"),
-        data.get("guardian2_email")
-    ))
+        conn = get_db()
+        cur = conn.cursor()
 
-    student_id = cur.lastrowid
-
-    # Create parent accounts from guardians if present
-    if data.get("guardian1_name"):
-        parent1_code = generate_parent_code()
-        parent1_username = f"parent_{student_number.lower()}_1"
         cur.execute("""
-            INSERT INTO parents (student_id, full_name, username, relationship, phone, whatsapp, email, parent_code)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO students (
+                student_number, first_name, last_name, birthday, gender, enrollment_date,
+                leaving_year, class_name, home_address, mailing_address, student_phone,
+                medical_info, emergency_contact,
+                guardian1_name, guardian1_relationship, guardian1_phone, guardian1_whatsapp, guardian1_email,
+                guardian2_name, guardian2_relationship, guardian2_phone, guardian2_whatsapp, guardian2_email
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            student_id,
-            data.get("guardian1_name"),
-            parent1_username,
-            data.get("guardian1_relationship"),
-            data.get("guardian1_phone"),
-            data.get("guardian1_whatsapp"),
-            data.get("guardian1_email"),
-            parent1_code
+            student_number,
+            data.get("first_name", ""),
+            data.get("last_name", ""),
+            data.get("birthday", ""),
+            data.get("gender", ""),
+            data.get("enrollment_date", ""),
+            data.get("leaving_year", ""),
+            data.get("class_name", ""),
+            data.get("home_address", ""),
+            data.get("mailing_address", ""),
+            data.get("student_phone", ""),
+            data.get("medical_info", ""),
+            data.get("emergency_contact", ""),
+            data.get("guardian1_name", ""),
+            data.get("guardian1_relationship", ""),
+            data.get("guardian1_phone", ""),
+            data.get("guardian1_whatsapp", ""),
+            data.get("guardian1_email", ""),
+            data.get("guardian2_name", ""),
+            data.get("guardian2_relationship", ""),
+            data.get("guardian2_phone", ""),
+            data.get("guardian2_whatsapp", ""),
+            data.get("guardian2_email", "")
         ))
 
-    if data.get("guardian2_name"):
-        parent2_code = generate_parent_code()
-        parent2_username = f"parent_{student_number.lower()}_2"
-        cur.execute("""
-            INSERT INTO parents (student_id, full_name, username, relationship, phone, whatsapp, email, parent_code)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            student_id,
-            data.get("guardian2_name"),
-            parent2_username,
-            data.get("guardian2_relationship"),
-            data.get("guardian2_phone"),
-            data.get("guardian2_whatsapp"),
-            data.get("guardian2_email"),
-            parent2_code
-        ))
+        conn.commit()
+        conn.close()
 
-    conn.commit()
-    conn.close()
+        flash("Student registered successfully!", "success")
+        return redirect(url_for("students"))
 
-    flash("Student registered successfully.", "success")
-    return redirect(url_for("students"))
-
+    except Exception as e:
+        return f"Error saving student: {str(e)}"
 
 @app.route("/student/<int:student_id>")
 @login_required
