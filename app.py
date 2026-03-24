@@ -5,7 +5,7 @@ import string
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, session
+    url_for, flash, session, g
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -20,16 +20,17 @@ DATABASE = os.path.join(BASE_DIR, "school.db")
 # DATABASE
 # -----------------------------
 def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if "db" not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
+from werkzeug.security import generate_password_hash
 
 def init_db():
-    conn = get_db()
+    conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    # Users
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +41,6 @@ def init_db():
         )
     """)
 
-    # Teachers
     cur.execute("""
         CREATE TABLE IF NOT EXISTS teachers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,7 +55,6 @@ def init_db():
         )
     """)
 
-    # Students
     cur.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,13 +71,11 @@ def init_db():
             student_phone TEXT,
             medical_info TEXT,
             emergency_contact TEXT,
-
             guardian1_name TEXT,
             guardian1_relationship TEXT,
             guardian1_phone TEXT,
             guardian1_whatsapp TEXT,
             guardian1_email TEXT,
-
             guardian2_name TEXT,
             guardian2_relationship TEXT,
             guardian2_phone TEXT,
@@ -87,7 +84,6 @@ def init_db():
         )
     """)
 
-    # Parent accounts
     cur.execute("""
         CREATE TABLE IF NOT EXISTS parents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +100,6 @@ def init_db():
         )
     """)
 
-    # Classes
     cur.execute("""
         CREATE TABLE IF NOT EXISTS classes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +107,6 @@ def init_db():
         )
     """)
 
-    # Subjects
     cur.execute("""
         CREATE TABLE IF NOT EXISTS subjects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,7 +114,6 @@ def init_db():
         )
     """)
 
-    # Fees
     cur.execute("""
         CREATE TABLE IF NOT EXISTS fees (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -136,7 +129,6 @@ def init_db():
         )
     """)
 
-    # Results
     cur.execute("""
         CREATE TABLE IF NOT EXISTS results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -151,7 +143,6 @@ def init_db():
         )
     """)
 
-    # Attendance
     cur.execute("""
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -164,9 +155,39 @@ def init_db():
         )
     """)
 
+    default_classes = [
+        "ECD A", "ECD B",
+        "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7",
+        "Form 1", "Form 2", "Form 3", "Form 4", "Form 5", "Form 6"
+    ]
+
+    default_subjects = [
+        "Mathematics", "English", "Science", "History", "Geography",
+        "Biology", "Chemistry", "Physics", "Agriculture", "Shona", "ICT"
+    ]
+
+    for class_name in default_classes:
+        cur.execute("INSERT OR IGNORE INTO classes (class_name) VALUES (?)", (class_name,))
+
+    for subject_name in default_subjects:
+        cur.execute("INSERT OR IGNORE INTO subjects (subject_name) VALUES (?)", (subject_name,))
+
+    cur.execute("SELECT id FROM users WHERE username = ?", ("admin",))
+    admin = cur.fetchone()
+
+    if not admin:
+        cur.execute("""
+            INSERT INTO users (full_name, username, password, role)
+            VALUES (?, ?, ?, ?)
+        """, (
+            "System Admin",
+            "admin",
+            generate_password_hash("admin123"),
+            "admin"
+        ))
+
     conn.commit()
     conn.close()
-
 
 def seed_data():
     conn = get_db()
@@ -210,17 +231,19 @@ def seed_data():
 # -----------------------------
 # HELPERS
 # -----------------------------
+import random
+import string
+
 def generate_student_number():
+    conn = get_db()
     while True:
         code = "STU" + "".join(random.choices(string.ascii_uppercase, k=2)) + "".join(random.choices(string.digits, k=4))
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM students WHERE student_number = ?", (code,))
-        exists = cur.fetchone()
-        conn.close()
-        if not exists:
+        existing = conn.execute(
+            "SELECT id FROM students WHERE student_number = ?",
+            (code,)
+        ).fetchone()
+        if not existing:
             return code
-
 
 def generate_teacher_id():
     conn = get_db()
@@ -507,12 +530,40 @@ def add_student():
 @roles_required("admin", "director")
 def save_student():
     try:
-        data = {key: request.form.get(key, "").strip() for key in request.form.keys()}
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
 
-        student_number = generate_student_number()
+        if not first_name or not last_name:
+            flash("First name and last name are required.", "danger")
+            return redirect(url_for("add_student"))
+
+        data = {
+            "birthday": request.form.get("birthday", "").strip(),
+            "gender": request.form.get("gender", "").strip(),
+            "enrollment_date": request.form.get("enrollment_date", "").strip(),
+            "leaving_year": request.form.get("leaving_year", "").strip(),
+            "class_name": request.form.get("class_name", "").strip(),
+            "home_address": request.form.get("home_address", "").strip(),
+            "mailing_address": request.form.get("mailing_address", "").strip(),
+            "student_phone": request.form.get("student_phone", "").strip(),
+            "medical_info": request.form.get("medical_info", "").strip(),
+            "emergency_contact": request.form.get("emergency_contact", "").strip(),
+            "guardian1_name": request.form.get("guardian1_name", "").strip(),
+            "guardian1_relationship": request.form.get("guardian1_relationship", "").strip(),
+            "guardian1_phone": request.form.get("guardian1_phone", "").strip(),
+            "guardian1_whatsapp": request.form.get("guardian1_whatsapp", "").strip(),
+            "guardian1_email": request.form.get("guardian1_email", "").strip(),
+            "guardian2_name": request.form.get("guardian2_name", "").strip(),
+            "guardian2_relationship": request.form.get("guardian2_relationship", "").strip(),
+            "guardian2_phone": request.form.get("guardian2_phone", "").strip(),
+            "guardian2_whatsapp": request.form.get("guardian2_whatsapp", "").strip(),
+            "guardian2_email": request.form.get("guardian2_email", "").strip(),
+        }
 
         conn = get_db()
         cur = conn.cursor()
+
+        student_number = generate_student_number()
 
         cur.execute("""
             INSERT INTO students (
@@ -524,32 +575,39 @@ def save_student():
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             student_number,
-            data.get("first_name", ""),
-            data.get("last_name", ""),
-            data.get("birthday", ""),
-            data.get("gender", ""),
-            data.get("enrollment_date", ""),
-            data.get("leaving_year", ""),
-            data.get("class_name", ""),
-            data.get("home_address", ""),
-            data.get("mailing_address", ""),
-            data.get("student_phone", ""),
-            data.get("medical_info", ""),
-            data.get("emergency_contact", ""),
-            data.get("guardian1_name", ""),
-            data.get("guardian1_relationship", ""),
-            data.get("guardian1_phone", ""),
-            data.get("guardian1_whatsapp", ""),
-            data.get("guardian1_email", ""),
-            data.get("guardian2_name", ""),
-            data.get("guardian2_relationship", ""),
-            data.get("guardian2_phone", ""),
-            data.get("guardian2_whatsapp", ""),
-            data.get("guardian2_email", "")
+            first_name,
+            last_name,
+            data["birthday"],
+            data["gender"],
+            data["enrollment_date"],
+            data["leaving_year"],
+            data["class_name"],
+            data["home_address"],
+            data["mailing_address"],
+            data["student_phone"],
+            data["medical_info"],
+            data["emergency_contact"],
+            data["guardian1_name"],
+            data["guardian1_relationship"],
+            data["guardian1_phone"],
+            data["guardian1_whatsapp"],
+            data["guardian1_email"],
+            data["guardian2_name"],
+            data["guardian2_relationship"],
+            data["guardian2_phone"],
+            data["guardian2_whatsapp"],
+            data["guardian2_email"]
         ))
 
         conn.commit()
-        conn.close()
+        flash("Student registered successfully.", "success")
+        return redirect(url_for("students"))
+
+    except Exception as e:
+        app.logger.exception("Error saving student")
+        flash(f"Error saving student: {e}", "danger")
+        return redirect(url_for("add_student"))
+    
 
         flash("Student registered successfully!", "success")
         return redirect(url_for("students"))
@@ -968,14 +1026,13 @@ def attendance():
 @app.route("/setup")
 def setup():
     init_db()
-    seed_data()
     return "Database setup complete."
-
 
 # -----------------------------
 # START APP
 # -----------------------------
-if __name__ == "__main__":
+with app.app_context():
     init_db()
-    seed_data()
+
+if __name__ == "__main__":
     app.run(debug=True)
