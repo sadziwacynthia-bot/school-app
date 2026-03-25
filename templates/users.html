@@ -1,37 +1,37 @@
 {% extends "base.html" %}
 
 {% block title %}Users{% endblock %}
-{% block page_title %}System Users{% endblock %}
 
 {% block content %}
-
-<div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="/register_teacher" class="btn">+ Register Teacher</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="page-title mb-0">Users</h2>
+    <a href="{{ url_for('add_user') }}" class="btn btn-primary">Add User</a>
 </div>
 
-<div class="content-card">
-    {% if user_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Username</th>
-                <th>Role</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in user_records %}
-            <tr>
-                <td>{{ user.full_name }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.role }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="card p-3">
+    {% if users %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.role }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <div class="empty-box">No users found.</div>
+        <p>No users found.</p>
     {% endif %}
 </div>
-
 {% endblock %}

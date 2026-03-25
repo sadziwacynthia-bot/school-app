@@ -1,39 +1,45 @@
 {% extends "base.html" %}
 
 {% block title %}Teachers{% endblock %}
-{% block page_title %}Teachers{% endblock %}
 
 {% block content %}
-
-<div style="margin-bottom:20px;">
-    <a href="/register_teacher" class="btn">+ Register Teacher</a>
-</div>
-
-<div class="content-card">
-    {% if teacher_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Teacher ID</th>
-                <th>Full Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for teacher in teacher_records %}
-            <tr>
-                <td>{{ teacher.teacher_id }}</td>
-                <td>{{ teacher.full_name }}</td>
-                <td>{{ teacher.phone }}</td>
-                <td>{{ teacher.email }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No teachers registered yet.</div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="page-title mb-0">Teachers</h2>
+    {% if session.get("role") in ["admin", "director"] %}
+    <a href="{{ url_for('register_teacher') }}" class="btn btn-primary">Register Teacher</a>
     {% endif %}
 </div>
 
+<div class="card p-3">
+    {% if teachers %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Teacher ID</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Subjects</th>
+                    <th>Class Teacher For</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teachers %}
+                <tr>
+                    <td>{{ teacher.teacher_id }}</td>
+                    <td>{{ teacher.full_name }}</td>
+                    <td>{{ teacher.phone }}</td>
+                    <td>{{ teacher.email }}</td>
+                    <td>{{ teacher.subjects }}</td>
+                    <td>{{ teacher.class_teacher_for }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p>No teachers found.</p>
+    {% endif %}
+</div>
 {% endblock %}

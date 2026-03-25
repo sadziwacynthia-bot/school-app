@@ -1,22 +1,24 @@
 {% extends "base.html" %}
 
 {% block title %}Classes{% endblock %}
-{% block page_title %}Classes{% endblock %}
 
 {% block content %}
-<div class="stats">
-    {% for class_item in class_records %}
-    <div class="stat-card">
-        <div class="stat-label">{{ class_item.class_name }}</div>
-        <div class="stat-value">{{ class_item.total_students }}</div>
-        <div style="margin-top:15px;">
-            <a href="/class/{{ class_item.class_name }}" class="btn">View Class</a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+<h2 class="page-title">Classes</h2>
 
-{% if not class_records %}
-<div class="empty-box">No classes found yet.</div>
-{% endif %}
+<div class="row g-4">
+    {% if classes %}
+        {% for c in classes %}
+        <div class="col-md-4">
+            <div class="card p-4 text-center">
+                <h4 class="text-primary">{{ c.class_name }}</h4>
+                <a href="{{ url_for('class_students', class_name=c.class_name) }}" class="btn btn-primary mt-3">
+                    View Students
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No classes found.</p>
+    {% endif %}
+</div>
 {% endblock %}

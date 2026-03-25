@@ -1,41 +1,43 @@
 {% extends "base.html" %}
 
 {% block title %}Add User{% endblock %}
-{% block page_title %}Add New User{% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <form method="POST" action="/add_user">
+<h2 class="page-title">Add User</h2>
 
-        <div class="grid mb-20">
-            <div>
-                <label>Full Name</label>
-                <input type="text" name="full_name" required>
+<div class="card p-4">
+    <form method="POST" action="{{ url_for('add_user') }}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="full_name" class="form-control" required>
             </div>
 
-            <div>
-                <label>Username</label>
-                <input type="text" name="username" required>
+            <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required>
             </div>
 
-            <div>
-                <label>Password</label>
-                <input type="password" name="password" required>
+            <div class="col-md-6">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
             </div>
 
-            <div>
-                <label>Role</label>
-                <select name="role" required>
-                    <option value="">Choose role</option>
-                    <option value="director">Director</option>
+            <div class="col-md-6">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select" required>
+                    <option value="">Select Role</option>
                     <option value="admin">Admin</option>
+                    <option value="director">Director</option>
                     <option value="teacher">Teacher</option>
-                    <option value="parent">Parent</option>
                 </select>
             </div>
         </div>
 
-        <button type="submit" class="btn">Create User</button>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Save User</button>
+            <a href="{{ url_for('users') }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}

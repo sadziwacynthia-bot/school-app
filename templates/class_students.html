@@ -1,169 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}{{ class_name }}{% endblock %}
-{% block page_title %}{{ class_name }}{% endblock %}
+{% block title %}Class Students{% endblock %}
 
 {% block content %}
-
-<div class="quick-actions mb-20" style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="/students" class="btn">All Students</a>
-    <a href="/attendance?class_name={{ class_name }}" class="btn">Take Attendance</a>
-    <a href="/fees?class_name={{ class_name }}" class="btn">View Fees</a>
-    <a href="/generate_fees" class="btn">Generate Fees</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="page-title mb-0">{{ class_name }} Students</h2>
+    <a href="{{ url_for('classes') }}" class="btn btn-secondary">Back to Classes</a>
 </div>
 
-<div class="stats">
-    <div class="stat-card">
-        <div class="stat-label">Total Students</div>
-        <div class="stat-value">{{ total_students }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Boys</div>
-        <div class="stat-value">{{ total_boys }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Girls</div>
-        <div class="stat-value">{{ total_girls }}</div>
-    </div>
-</div>
-
-<div class="content-card mb-20">
-    <h3>Class Fees Summary</h3>
-
-    <form method="GET" action="/class/{{ class_name }}" class="mb-20">
-        <div class="grid">
-            <div>
-                <label>Academic Year</label>
-                <input type="text" name="academic_year" value="{{ selected_year or '' }}" placeholder="Example: 2026">
-            </div>
-
-            <div style="display:flex; align-items:end;">
-                <button type="submit" class="btn">Load Fee Summary</button>
-            </div>
-        </div>
-    </form>
-
-    {% if selected_year and fee_summary %}
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-label">Total Fee</div>
-            <div class="stat-value">${{ "%.2f"|format(fee_summary.total_fee or 0) }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Total Paid</div>
-            <div class="stat-value">${{ "%.2f"|format(fee_summary.total_paid or 0) }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Outstanding Balance</div>
-            <div class="stat-value">${{ "%.2f"|format(fee_summary.total_balance or 0) }}</div>
-        </div>
-    </div>
-    {% elif selected_year %}
-    <div class="empty-box">No fee summary found for this year.</div>
-    {% endif %}
-</div>
-<div class="content-card mb-20">
-    <h3>Attendance History</h3>
-
-    <form method="GET" action="/class/{{ class_name }}" class="mb-20">
-        <div class="grid">
-            <div>
-                <label>Attendance Date</label>
-                <input type="date" name="attendance_date" value="{{ attendance_date or '' }}">
-            </div>
-
-            <div>
-                <input type="hidden" name="academic_year" value="{{ selected_year or '' }}">
-                <button type="submit" class="btn" style="margin-top:30px;">Load Attendance</button>
-            </div>
-        </div>
-    </form>
-
-    {% if attendance_date and attendance_summary %}
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-label">Present</div>
-            <div class="stat-value">{{ attendance_summary.present_count or 0 }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Absent</div>
-            <div class="stat-value">{{ attendance_summary.absent_count or 0 }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">Late</div>
-            <div class="stat-value">{{ attendance_summary.late_count or 0 }}</div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if attendance_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Student Number</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in attendance_records %}
-            <tr>
-                <td>{{ record.student_number }}</td>
-                <td>{{ record.first_name }}</td>
-                <td>{{ record.last_name }}</td>
-                <td>{{ record.date }}</td>
-                <td>{{ record.status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% elif attendance_date %}
-    <div class="empty-box">No attendance records found for this date.</div>
-    {% endif %}
-</div>
-<div class="content-card">
-    <h3>Students in {{ class_name }}</h3>
-
+<div class="card p-3">
     {% if students %}
-    <table>
-        <thead>
-            <tr>
-                <th>Student Number</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Gender</th>
-                <th>Birthday</th>
-                <th>Phone</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.student_number }}</td>
-                <td>{{ student.first_name }}</td>
-                <td>{{ student.last_name }}</td>
-                <td>{{ student.gender }}</td>
-                <td>{{ student.birthday }}</td>
-                <td>{{ student.student_phone }}</td>
-                <td>
-                    <a href="/student/{{ student.id }}" class="btn">View Profile</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Student Number</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Gender</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.student_number }}</td>
+                    <td>{{ student.first_name }}</td>
+                    <td>{{ student.last_name }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>
+                        <a href="{{ url_for('student_profile', student_id=student.id) }}" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <div class="empty-box">No students found in this class.</div>
+        <p>No students found in this class.</p>
     {% endif %}
 </div>
-
 {% endblock %}

@@ -84,9 +84,6 @@
                 <a class="btn btn-outline-light btn-sm" href="{{ url_for('results') }}">Results</a>
                 <a class="btn btn-outline-light btn-sm" href="{{ url_for('attendance') }}">Attendance</a>
                 <a class="btn btn-outline-light btn-sm" href="{{ url_for('teachers') }}">Teachers</a>
-                {% if session.get("role") in ["admin", "director"] %}
-                <a class="btn btn-outline-light btn-sm" href="{{ url_for('users') }}">Users</a>
-                {% endif %}
                 <a class="btn btn-danger btn-sm" href="{{ url_for('logout') }}">Logout</a>
             </div>
         </div>
