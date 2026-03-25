@@ -1,109 +1,56 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="quick-actions mb-20">
-
-<a href="/add_student" class="btn">+ Add Student</a>
-
-<a href="/students" class="btn">Students</a>
-
-<a href="/attendance" class="btn">Take Attendance</a>
-
-<a href="/fees" class="btn">Manage Fees</a>
-
-<a href="/generate_fees" class="btn">Generate Year Fees</a>
-
-</div>
-<div class="stats">
-    <div class="stat-card">
-        <div class="stat-label">Total Students</div>
-        <div class="stat-value">{{ total_students }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Classes</div>
-        <div class="stat-value">{{ total_classes }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Boys</div>
-        <div class="stat-value">{{ total_boys }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Girls</div>
-        <div class="stat-value">{{ total_girls }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Fees</div>
-        <div class="stat-value">${{ "%.2f"|format(total_fees or 0) }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Total Paid</div>
-        <div class="stat-value">${{ "%.2f"|format(total_paid or 0) }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Outstanding Balance</div>
-        <div class="stat-value">${{ "%.2f"|format(total_balance or 0) }}</div>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2>Dashboard</h2>
+        <p class="text-muted mb-0">Welcome, {{ session.get('full_name') }}</p>
     </div>
 </div>
 
-<div class="content-card mb-20">
-    <h3>Recently Registered Students</h3>
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h5>Total Students</h5>
+            <h2>{{ total_students }}</h2>
+        </div>
+    </div>
 
-    {% if recent_students %}
-    <table>
-        <thead>
-            <tr>
-                <th>Student Number</th>
-                <th>Name</th>
-                <th>Class</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in recent_students %}
-            <tr>
-                <td>{{ student.student_number }}</td>
-                <td>{{ student.first_name }} {{ student.last_name }}</td>
-                <td>{{ student.class_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No students registered yet.</div>
-    {% endif %}
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h5>Total Teachers</h5>
+            <h2>{{ total_teachers }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h5>Total Classes</h5>
+            <h2>{{ total_classes }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <h5>Total Users</h5>
+            <h2>{{ total_users }}</h2>
+        </div>
+    </div>
 </div>
 
-<div class="content-card">
-    <h3>Class Summary</h3>
-
-    {% if class_summary %}
-    <table>
-        <thead>
-            <tr>
-                <th>Class</th>
-                <th>Total Students</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for class_item in class_summary %}
-            <tr>
-                <td>{{ class_item.class_name }}</td>
-                <td>{{ class_item.total_students }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No classes found.</div>
-    {% endif %}
+<div class="row g-4 mt-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4">
+            <h4>Quick Actions</h4>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{{ url_for('add_student') }}" class="btn btn-primary">Register Student</a>
+                <a href="{{ url_for('register_teacher') }}" class="btn btn-success">Register Teacher</a>
+                <a href="{{ url_for('add_fee') }}" class="btn btn-warning">Add Fee</a>
+                <a href="{{ url_for('results') }}" class="btn btn-info">Enter Results</a>
+            </div>
+        </div>
+    </div>
 </div>
-
 {% endblock %}
