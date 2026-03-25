@@ -209,9 +209,23 @@ default_classes = [
     "Form 4 Blue",
     "Form 4 Grey",
     "Form 5",
-    "Lower 6",
-    "Upper 6"
+    "Form 6"
 ]
+cursor.execute("""
+DELETE FROM classes
+WHERE class_name NOT IN (
+    'Form 1 Blue',
+    'Form 1 Grey',
+    'Form 2 Blue',
+    'Form 2 Grey',
+    'Form 3 Blue',
+    'Form 3 Grey',
+    'Form 4 Blue',
+    'Form 4 Grey',
+    'Form 5',
+    'Form 6'
+)
+""")
 
 for class_name in default_classes:
     cursor.execute("""
