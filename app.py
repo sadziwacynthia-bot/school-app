@@ -754,9 +754,12 @@ def parent_setup(parent_code):
 @login_required
 def classes():
     conn = get_db()
-    class_list = conn.execute("SELECT class_name FROM classes ORDER BY class_name").fetchall()
+    class_list = conn.execute("""
+        SELECT class_name
+        FROM classes
+        ORDER BY class_name
+    """).fetchall()
     return render_template("classes.html", classes=class_list)
-
 
 @app.route("/class/<class_name>/students")
 @login_required
