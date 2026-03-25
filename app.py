@@ -17,7 +17,7 @@ DATABASE = os.path.join(BASE_DIR, "school.db")
 
 
 # ---------------------------------
-# DATABASE
+# DATABASE CONNECTION
 # ---------------------------------
 def get_db():
     if "db" not in g:
@@ -31,169 +31,6 @@ def close_db(error=None):
     db = g.pop("db", None)
     if db is not None:
         db.close()
-
-
-def init_db():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            full_name TEXT NOT NULL,
-            username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS teachers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            teacher_id TEXT UNIQUE,
-            full_name TEXT NOT NULL,
-            phone TEXT,
-            email TEXT,
-            subjects TEXT,
-            class_teacher_for TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS students (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_number TEXT UNIQUE,
-            first_name TEXT NOT NULL,
-            last_name TEXT NOT NULL,
-            birthday TEXT,
-            gender TEXT,
-            enrollment_date TEXT,
-            leaving_year TEXT,
-            class_name TEXT,
-            home_address TEXT,
-            mailing_address TEXT,
-            student_phone TEXT,
-            medical_info TEXT,
-            emergency_contact TEXT,
-            guardian1_name TEXT,
-            guardian1_relationship TEXT,
-            guardian1_phone TEXT,
-            guardian1_whatsapp TEXT,
-            guardian1_email TEXT,
-            guardian2_name TEXT,
-            guardian2_relationship TEXT,
-            guardian2_phone TEXT,
-            guardian2_whatsapp TEXT,
-            guardian2_email TEXT
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS parents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id INTEGER NOT NULL,
-            full_name TEXT NOT NULL,
-            username TEXT UNIQUE,
-            password TEXT,
-            relationship TEXT,
-            phone TEXT,
-            whatsapp TEXT,
-            email TEXT,
-            parent_code TEXT UNIQUE,
-            FOREIGN KEY (student_id) REFERENCES students(id)
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS classes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            class_name TEXT NOT NULL UNIQUE
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS subjects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            subject_name TEXT NOT NULL UNIQUE
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS fees (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id INTEGER NOT NULL,
-            academic_year TEXT,
-            term TEXT,
-            amount REAL NOT NULL DEFAULT 0,
-            paid_amount REAL NOT NULL DEFAULT 0,
-            balance REAL NOT NULL DEFAULT 0,
-            status TEXT,
-            due_date TEXT,
-            FOREIGN KEY (student_id) REFERENCES students(id)
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id INTEGER NOT NULL,
-            subject_id INTEGER NOT NULL,
-            class_name TEXT,
-            term TEXT,
-            academic_year TEXT,
-            marks REAL,
-            FOREIGN KEY (student_id) REFERENCES students(id),
-            FOREIGN KEY (subject_id) REFERENCES subjects(id)
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS attendance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            student_id INTEGER NOT NULL,
-            class_name TEXT,
-            date TEXT NOT NULL,
-            status TEXT NOT NULL,
-            remarks TEXT,
-            FOREIGN KEY (student_id) REFERENCES students(id)
-        )
-    """)
-
-    default_classes = [
-        "ECD A", "ECD B",
-        "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7",
-        "Form 1", "Form 2", "Form 3", "Form 4", "Form 5", "Form 6"
-    ]
-
-    default_subjects = [
-        "Mathematics", "English", "Science", "History", "Geography",
-        "Biology", "Chemistry", "Physics", "Agriculture", "Shona", "ICT"
-    ]
-
-    for class_name in default_classes:
-        cur.execute("INSERT OR IGNORE INTO classes (class_name) VALUES (?)", (class_name,))
-
-    for subject_name in default_subjects:
-        cur.execute("INSERT OR IGNORE INTO subjects (subject_name) VALUES (?)", (subject_name,))
-
-    cur.execute("SELECT id FROM users WHERE username = ?", ("admin",))
-    admin = cur.fetchone()
-
-    if not admin:
-        cur.execute("""
-            INSERT INTO users (full_name, username, password, role)
-            VALUES (?, ?, ?, ?)
-        """, (
-            "System Admin",
-            "admin",
-            generate_password_hash("admin123"),
-            "admin"
-        ))
-
-    conn.commit()
-    conn.close()
 
 
 # ---------------------------------
@@ -228,6 +65,286 @@ def generate_parent_code():
         ).fetchone()
         if not existing:
             return code
+
+
+# ---------------------------------
+# DATABASE SETUP / MIGRATION
+# ---------------------------------
+def init_db():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # USERS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL
+        )
+    """)
+
+    # TEACHERS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS teachers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            teacher_id TEXT UNIQUE,
+            full_name TEXT NOT NULL,
+            phone TEXT,
+            email TEXT,
+            subjects TEXT,
+            class_teacher_for TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+
+    # STUDENTS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_number TEXT,
+            first_name TEXT NOT NULL,
+            last_name TEXT NOT NULL,
+            birthday TEXT,
+            gender TEXT,
+            enrollment_date TEXT,
+            leaving_year TEXT,
+            class_name TEXT,
+            home_address TEXT,
+            mailing_address TEXT,
+            student_phone TEXT,
+            medical_info TEXT,
+            emergency_contact TEXT,
+            guardian1_name TEXT,
+            guardian1_relationship TEXT,
+            guardian1_phone TEXT,
+            guardian1_whatsapp TEXT,
+            guardian1_email TEXT,
+            guardian2_name TEXT,
+            guardian2_relationship TEXT,
+            guardian2_phone TEXT,
+            guardian2_whatsapp TEXT,
+            guardian2_email TEXT
+        )
+    """)
+
+    # PARENTS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS parents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            full_name TEXT NOT NULL,
+            username TEXT UNIQUE,
+            password TEXT,
+            relationship TEXT,
+            phone TEXT,
+            whatsapp TEXT,
+            email TEXT,
+            parent_code TEXT UNIQUE,
+            FOREIGN KEY (student_id) REFERENCES students(id)
+        )
+    """)
+
+    # CLASSES
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS classes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    # SUBJECTS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    # FEES
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fees (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            academic_year TEXT,
+            term TEXT,
+            amount REAL NOT NULL DEFAULT 0,
+            paid_amount REAL NOT NULL DEFAULT 0,
+            balance REAL NOT NULL DEFAULT 0,
+            status TEXT,
+            due_date TEXT,
+            FOREIGN KEY (student_id) REFERENCES students(id)
+        )
+    """)
+
+    # RESULTS
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            subject_id INTEGER NOT NULL,
+            class_name TEXT,
+            term TEXT,
+            academic_year TEXT,
+            marks REAL,
+            FOREIGN KEY (student_id) REFERENCES students(id),
+            FOREIGN KEY (subject_id) REFERENCES subjects(id)
+        )
+    """)
+
+    # ATTENDANCE
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            class_name TEXT,
+            date TEXT NOT NULL,
+            status TEXT NOT NULL,
+            remarks TEXT,
+            FOREIGN KEY (student_id) REFERENCES students(id)
+        )
+    """)
+
+    # ---------------------------------
+    # MIGRATIONS FOR OLD DATABASES
+    # ---------------------------------
+    cursor.execute("PRAGMA table_info(students)")
+    student_columns = [col[1] for col in cursor.fetchall()]
+
+    if "student_number" not in student_columns:
+        cursor.execute("ALTER TABLE students ADD COLUMN student_number TEXT")
+
+    cursor.execute("PRAGMA table_info(parents)")
+    parent_columns = [col[1] for col in cursor.fetchall()]
+
+    if "username" not in parent_columns:
+        cursor.execute("ALTER TABLE parents ADD COLUMN username TEXT")
+    if "password" not in parent_columns:
+        cursor.execute("ALTER TABLE parents ADD COLUMN password TEXT")
+    if "parent_code" not in parent_columns:
+        cursor.execute("ALTER TABLE parents ADD COLUMN parent_code TEXT")
+
+    # Fill old students with numbers if missing
+    cursor.execute("SELECT id, student_number FROM students")
+    old_students = cursor.fetchall()
+    for row in old_students:
+        if not row["student_number"]:
+            code = f"STU{row['id']:04d}"
+            cursor.execute(
+                "UPDATE students SET student_number = ? WHERE id = ?",
+                (code, row["id"])
+            )
+
+    # Fill old parents with setup codes if missing
+    cursor.execute("SELECT id, parent_code FROM parents")
+    old_parents = cursor.fetchall()
+    for row in old_parents:
+        if not row["parent_code"]:
+            code = "PAR" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            cursor.execute(
+                "UPDATE parents SET parent_code = ? WHERE id = ?",
+                (code, row["id"])
+            )
+
+    # ---------------------------------
+    # DEFAULT DATA
+    # ---------------------------------
+    wanted_classes = [
+        "Form 1 Blue",
+        "Form 1 Grey",
+        "Form 2 Blue",
+        "Form 2 Grey",
+        "Form 3 Blue",
+        "Form 3 Grey",
+        "Form 4 Blue",
+        "Form 4 Grey",
+        "Form 5",
+        "Form 6"
+    ]
+
+    default_subjects = [
+        "Mathematics",
+        "English",
+        "Geography",
+        "History",
+        "Science",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Accounting",
+        "Religious Studies",
+        "Shona",
+        "Computer Science"
+    ]
+
+    # Remove unwanted classes from classes table
+    cursor.execute("""
+        DELETE FROM classes
+        WHERE class_name NOT IN (
+            'Form 1 Blue',
+            'Form 1 Grey',
+            'Form 2 Blue',
+            'Form 2 Grey',
+            'Form 3 Blue',
+            'Form 3 Grey',
+            'Form 4 Blue',
+            'Form 4 Grey',
+            'Form 5',
+            'Form 6'
+        )
+    """)
+
+    # Insert wanted classes
+    for class_name in wanted_classes:
+        cursor.execute(
+            "INSERT OR IGNORE INTO classes (class_name) VALUES (?)",
+            (class_name,)
+        )
+
+    # Clear invalid student classes
+    cursor.execute("""
+        UPDATE students
+        SET class_name = ''
+        WHERE class_name NOT IN (
+            'Form 1 Blue',
+            'Form 1 Grey',
+            'Form 2 Blue',
+            'Form 2 Grey',
+            'Form 3 Blue',
+            'Form 3 Grey',
+            'Form 4 Blue',
+            'Form 4 Grey',
+            'Form 5',
+            'Form 6',
+            ''
+        )
+    """)
+
+    for subject_name in default_subjects:
+        cursor.execute(
+            "INSERT OR IGNORE INTO subjects (subject_name) VALUES (?)",
+            (subject_name,)
+        )
+
+    # Default admin user
+    cursor.execute("SELECT id FROM users WHERE username = ?", ("admin",))
+    admin = cursor.fetchone()
+    if not admin:
+        cursor.execute("""
+            INSERT INTO users (full_name, username, password, role)
+            VALUES (?, ?, ?, ?)
+        """, (
+            "System Admin",
+            "admin",
+            generate_password_hash("admin123"),
+            "admin"
+        ))
+
+    conn.commit()
+    conn.close()
 
 
 # ---------------------------------
@@ -313,6 +430,9 @@ def logout():
     return redirect(url_for("login"))
 
 
+# ---------------------------------
+# DASHBOARD
+# ---------------------------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -419,7 +539,6 @@ def register_teacher():
                 subjects,
                 class_teacher_for
             ))
-
             conn.commit()
             flash("Teacher registered successfully.", "success")
             return redirect(url_for("teachers"))
@@ -761,6 +880,7 @@ def classes():
     """).fetchall()
     return render_template("classes.html", classes=class_list)
 
+
 @app.route("/class/<class_name>/students")
 @login_required
 def class_students(class_name):
@@ -827,7 +947,7 @@ def add_fee():
         conn.commit()
 
         flash("Fee added successfully.", "success")
-        return redirect(url_for("students"))
+        return redirect(url_for("fees"))
 
     students_list = conn.execute("""
         SELECT id, first_name, last_name, student_number
@@ -855,7 +975,7 @@ def results():
         marks = request.form.get("marks", "").strip()
 
         if not student_id or not subject_id or not class_name or not term or not academic_year or not marks:
-            flash("Please fill in all result fields.", "danger")
+            flash("Please fill in all fields.", "danger")
             return redirect(url_for("results"))
 
         try:
@@ -871,37 +991,42 @@ def results():
 
         return redirect(url_for("results"))
 
-    students_list = conn.execute("""
-        SELECT id, first_name, last_name, student_number, class_name
+    students = conn.execute("""
+        SELECT id, first_name, last_name, class_name
         FROM students
         ORDER BY first_name, last_name
     """).fetchall()
 
-    subjects_list = conn.execute("""
-        SELECT * FROM subjects
+    subjects = conn.execute("""
+        SELECT id, subject_name
+        FROM subjects
         ORDER BY subject_name
     """).fetchall()
 
-    classes_list = conn.execute("""
-        SELECT class_name FROM classes
+    classes = conn.execute("""
+        SELECT class_name
+        FROM classes
         ORDER BY class_name
     """).fetchall()
 
     results_list = conn.execute("""
-        SELECT results.*, students.first_name, students.last_name, subjects.subject_name
+        SELECT results.id, results.class_name, results.term, results.academic_year, results.marks,
+               students.first_name, students.last_name,
+               subjects.subject_name
         FROM results
         JOIN students ON results.student_id = students.id
         JOIN subjects ON results.subject_id = subjects.id
-        ORDER BY results.academic_year DESC, results.term, students.first_name
+        ORDER BY results.academic_year DESC, results.term, students.first_name, students.last_name
     """).fetchall()
 
     return render_template(
         "results.html",
-        students=students_list,
-        subjects=subjects_list,
-        classes=classes_list,
+        students=students,
+        subjects=subjects,
+        classes=classes,
         results_list=results_list
     )
+
 
 # ---------------------------------
 # ATTENDANCE
