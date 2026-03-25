@@ -851,13 +851,21 @@ def results():
         academic_year = request.form.get("academic_year", "").strip()
         marks = request.form.get("marks", "").strip()
 
-        conn.execute("""
-            INSERT INTO results (student_id, subject_id, class_name, term, academic_year, marks)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (student_id, subject_id, class_name, term, academic_year, marks))
-        conn.commit()
+        if not student_id or not subject_id or not class_name or not term or not academic_year or not marks:
+            flash("Please fill in all result fields.", "danger")
+            return redirect(url_for("results"))
 
-        flash("Result saved successfully.", "success")
+        try:
+            conn.execute("""
+                INSERT INTO results (student_id, subject_id, class_name, term, academic_year, marks)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (student_id, subject_id, class_name, term, academic_year, marks))
+            conn.commit()
+            flash("Result saved successfully.", "success")
+        except Exception as e:
+            app.logger.exception("Error saving result")
+            flash(f"Error saving result: {e}", "danger")
+
         return redirect(url_for("results"))
 
     students_list = conn.execute("""
@@ -866,8 +874,15 @@ def results():
         ORDER BY first_name, last_name
     """).fetchall()
 
-    subjects_list = conn.execute("SELECT * FROM subjects ORDER BY subject_name").fetchall()
-    classes_list = conn.execute("SELECT class_name FROM classes ORDER BY class_name").fetchall()
+    subjects_list = conn.execute("""
+        SELECT * FROM subjects
+        ORDER BY subject_name
+    """).fetchall()
+
+    classes_list = conn.execute("""
+        SELECT class_name FROM classes
+        ORDER BY class_name
+    """).fetchall()
 
     results_list = conn.execute("""
         SELECT results.*, students.first_name, students.last_name, subjects.subject_name
@@ -884,7 +899,6 @@ def results():
         classes=classes_list,
         results_list=results_list
     )
-
 
 # ---------------------------------
 # ATTENDANCE
