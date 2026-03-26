@@ -1,71 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Assign Parent{% endblock %}
-{% block page_title %}Link Parent to Student{% endblock %}
-
 {% block content %}
-
-<div class="content-card mb-20">
-    <form method="POST" action="/assign_parent">
-        <div class="grid mb-20">
-            <div>
-                <label>Select Parent</label>
-                <select name="user_id" required>
-                    <option value="">Choose parent</option>
-                    {% for parent in parents %}
-                        <option value="{{ parent.id }}">
-                            {{ parent.full_name }} ({{ parent.username }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label>Select Student</label>
-                <select name="student_id" required>
-                    <option value="">Choose student</option>
-                    {% for student in students %}
-                        <option value="{{ student.id }}">
-                            {{ student.first_name }} {{ student.last_name }} - {{ student.class_name }} ({{ student.student_number }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <button type="submit" class="btn">Link Parent</button>
-    </form>
+<div class="card">
+    <h1 class="page-title">Assign Parent</h1>
+    <p class="page-subtitle">Link a parent account to a student.</p>
 </div>
-
-<div class="content-card">
-    <h3>Current Parent Links</h3>
-
-    {% if assignments %}
-    <table>
-        <thead>
-            <tr>
-                <th>Parent Name</th>
-                <th>Username</th>
-                <th>Student Number</th>
-                <th>Student Name</th>
-                <th>Class</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in assignments %}
-            <tr>
-                <td>{{ item.full_name }}</td>
-                <td>{{ item.username }}</td>
-                <td>{{ item.student_number }}</td>
-                <td>{{ item.first_name }} {{ item.last_name }}</td>
-                <td>{{ item.class_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No parent links yet.</div>
-    {% endif %}
-</div>
-
 {% endblock %}

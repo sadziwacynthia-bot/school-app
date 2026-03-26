@@ -1,139 +1,40 @@
 {% extends "base.html" %}
-
 {% block title %}Edit Student{% endblock %}
-
 {% block content %}
-<h2 class="page-title">Edit Student</h2>
+<div class="card">
+    <h1 class="page-title">Edit Student</h1>
 
-<div class="card p-4">
-    <form method="POST">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" value="{{ student.first_name }}" required>
+    <form method="GET">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" class="form-control" value="{{ student.first_name }}" readonly>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Last Name</label>
-                <input type="text" name="last_name" class="form-control" value="{{ student.last_name }}" required>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" class="form-control" value="{{ student.last_name }}" readonly>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Birthday</label>
-                <input type="date" name="birthday" class="form-control" value="{{ student.birthday }}">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Gender</label>
-                <select name="gender" class="form-select">
-                    <option value="">Select Gender</option>
-                    <option value="Male" {% if student.gender == "Male" %}selected{% endif %}>Male</option>
-                    <option value="Female" {% if student.gender == "Female" %}selected{% endif %}>Female</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Enrollment Date</label>
-                <input type="date" name="enrollment_date" class="form-control" value="{{ student.enrollment_date }}">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Leaving Year</label>
-                <input type="text" name="leaving_year" class="form-control" value="{{ student.leaving_year }}">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Class</label>
-                <select name="class_name" class="form-select">
-                    <option value="">Select Class</option>
-                    {% for c in classes %}
-                    <option value="{{ c.class_name }}" {% if student.class_name == c.class_name %}selected{% endif %}>
-                        {{ c.class_name }}
-                    </option>
+            <div class="form-group">
+                <label>Class</label>
+                <select class="form-control">
+                    {% for class_name in class_options %}
+                    <option value="{{ class_name }}" {% if student.class_name == class_name %}selected{% endif %}>{{ class_name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Student Phone</label>
-                <input type="text" name="student_phone" class="form-control" value="{{ student.student_phone }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Home Address</label>
-                <input type="text" name="home_address" class="form-control" value="{{ student.home_address }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Mailing Address</label>
-                <input type="text" name="mailing_address" class="form-control" value="{{ student.mailing_address }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Medical Info</label>
-                <textarea name="medical_info" class="form-control" rows="3">{{ student.medical_info }}</textarea>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Emergency Contact</label>
-                <input type="text" name="emergency_contact" class="form-control" value="{{ student.emergency_contact }}">
+            <div class="form-group">
+                <label>Student Type</label>
+                <select class="form-control">
+                    <option {% if student.boarding_status == 'Day' %}selected{% endif %}>Day</option>
+                    <option {% if student.boarding_status == 'Boarder' %}selected{% endif %}>Boarder</option>
+                </select>
             </div>
         </div>
 
-        <hr class="my-4">
-
-        <h4 class="text-primary">Guardian 1</h4>
-        <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <label class="form-label">Name</label>
-                <input type="text" name="guardian1_name" class="form-control" value="{{ student.guardian1_name }}">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Relationship</label>
-                <input type="text" name="guardian1_relationship" class="form-control" value="{{ student.guardian1_relationship }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Phone</label>
-                <input type="text" name="guardian1_phone" class="form-control" value="{{ student.guardian1_phone }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">WhatsApp</label>
-                <input type="text" name="guardian1_whatsapp" class="form-control" value="{{ student.guardian1_whatsapp }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Email</label>
-                <input type="email" name="guardian1_email" class="form-control" value="{{ student.guardian1_email }}">
-            </div>
-        </div>
-
-        <h4 class="text-primary">Guardian 2</h4>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Name</label>
-                <input type="text" name="guardian2_name" class="form-control" value="{{ student.guardian2_name }}">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Relationship</label>
-                <input type="text" name="guardian2_relationship" class="form-control" value="{{ student.guardian2_relationship }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Phone</label>
-                <input type="text" name="guardian2_phone" class="form-control" value="{{ student.guardian2_phone }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">WhatsApp</label>
-                <input type="text" name="guardian2_whatsapp" class="form-control" value="{{ student.guardian2_whatsapp }}">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Email</label>
-                <input type="email" name="guardian2_email" class="form-control" value="{{ student.guardian2_email }}">
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Update Student</button>
-            <a href="{{ url_for('student_profile', student_id=student.id) }}" class="btn btn-secondary">Cancel</a>
-        </div>
+        <a href="{{ url_for('students') }}" class="btn">Back to Students</a>
     </form>
 </div>
 {% endblock %}

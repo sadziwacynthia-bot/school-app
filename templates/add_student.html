@@ -1,135 +1,221 @@
 {% extends "base.html" %}
-
-{% block title %}Register Student{% endblock %}
+{% block title %}Add Student{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Register Student</h2>
+<div class="card">
+    <h1 class="page-title">Add Student</h1>
+    <p class="page-subtitle">Register a student with full details, guardians, parent login, and term fees.</p>
 
-<div class="card p-4">
-    <form method="POST" action="{{ url_for('save_student') }}">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" required>
+    <form action="{{ url_for('save_student') }}" method="POST">
+
+        <h3 style="color:#1565c0;">Student Details</h3>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" required>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Last Name</label>
-                <input type="text" name="last_name" class="form-control" required>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" required>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Birthday</label>
-                <input type="date" name="birthday" class="form-control">
+            <div class="form-group">
+                <label for="birthday">Date of Birth</label>
+                <input type="date" id="birthday" name="birthday" class="form-control">
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Gender</label>
-                <select name="gender" class="form-select">
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" class="form-control">
                     <option value="">Select Gender</option>
-                    <option>Male</option>
-                    <option>Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
                 </select>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Enrollment Date</label>
-                <input type="date" name="enrollment_date" class="form-control">
+            <div class="form-group">
+                <label for="enrollment_date">Enrollment Date</label>
+                <input type="date" id="enrollment_date" name="enrollment_date" class="form-control">
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Leaving Year</label>
-                <input type="text" name="leaving_year" class="form-control">
+            <div class="form-group">
+                <label for="leaving_year">Leaving Year</label>
+                <input type="text" id="leaving_year" name="leaving_year" class="form-control" placeholder="e.g. 2029">
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Class</label>
-                <select name="class_name" class="form-select">
+            <div class="form-group">
+                <label for="class_name">Class</label>
+                <select id="class_name" name="class_name" class="form-control" required>
                     <option value="">Select Class</option>
-                    {% for c in classes %}
-                    <option value="{{ c.class_name }}">{{ c.class_name }}</option>
+                    {% for class_name in class_options %}
+                        <option value="{{ class_name }}">{{ class_name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Student Phone</label>
-                <input type="text" name="student_phone" class="form-control">
+            <div class="form-group">
+                <label for="boarding_status">Student Type</label>
+                <select id="boarding_status" name="boarding_status" class="form-control" required>
+                    <option value="">Select Type</option>
+                    <option value="Day">Day</option>
+                    <option value="Boarder">Boarder</option>
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Home Address</label>
-                <input type="text" name="home_address" class="form-control">
+            <div class="form-group">
+                <label for="home_address">Home Address</label>
+                <input type="text" id="home_address" name="home_address" class="form-control">
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Mailing Address</label>
-                <input type="text" name="mailing_address" class="form-control">
+            <div class="form-group">
+                <label for="mailing_address">Mailing Address</label>
+                <input type="text" id="mailing_address" name="mailing_address" class="form-control">
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Medical Info</label>
-                <textarea name="medical_info" class="form-control" rows="3"></textarea>
+            <div class="form-group">
+                <label for="student_phone">Student Phone</label>
+                <input type="text" id="student_phone" name="student_phone" class="form-control">
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Emergency Contact</label>
-                <input type="text" name="emergency_contact" class="form-control">
+            <div class="form-group">
+                <label for="medical_info">Medical Info</label>
+                <input type="text" id="medical_info" name="medical_info" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="emergency_contact">Emergency Contact</label>
+                <input type="text" id="emergency_contact" name="emergency_contact" class="form-control">
             </div>
         </div>
 
-        <hr class="my-4">
+        <h3 style="color:#1565c0;">Guardian 1 Details</h3>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="guardian1_name">Guardian 1 Name</label>
+                <input type="text" id="guardian1_name" name="guardian1_name" class="form-control" required>
+            </div>
 
-        <h4 class="text-primary">Guardian 1</h4>
-        <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <label class="form-label">Name</label>
-                <input type="text" name="guardian1_name" class="form-control">
+            <div class="form-group">
+                <label for="guardian1_relationship">Relationship</label>
+                <input type="text" id="guardian1_relationship" name="guardian1_relationship" class="form-control">
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Relationship</label>
-                <input type="text" name="guardian1_relationship" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian1_phone">Phone</label>
+                <input type="text" id="guardian1_phone" name="guardian1_phone" class="form-control" required>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Phone</label>
-                <input type="text" name="guardian1_phone" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian1_whatsapp">WhatsApp</label>
+                <input type="text" id="guardian1_whatsapp" name="guardian1_whatsapp" class="form-control">
             </div>
-            <div class="col-md-4">
-                <label class="form-label">WhatsApp</label>
-                <input type="text" name="guardian1_whatsapp" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Email</label>
-                <input type="email" name="guardian1_email" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian1_email">Email</label>
+                <input type="email" id="guardian1_email" name="guardian1_email" class="form-control">
             </div>
         </div>
 
-        <h4 class="text-primary">Guardian 2</h4>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Name</label>
-                <input type="text" name="guardian2_name" class="form-control">
+        <h3 style="color:#1565c0;">Guardian 2 Details</h3>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="guardian2_name">Guardian 2 Name</label>
+                <input type="text" id="guardian2_name" name="guardian2_name" class="form-control">
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Relationship</label>
-                <input type="text" name="guardian2_relationship" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian2_relationship">Relationship</label>
+                <input type="text" id="guardian2_relationship" name="guardian2_relationship" class="form-control">
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Phone</label>
-                <input type="text" name="guardian2_phone" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian2_phone">Phone</label>
+                <input type="text" id="guardian2_phone" name="guardian2_phone" class="form-control">
             </div>
-            <div class="col-md-4">
-                <label class="form-label">WhatsApp</label>
-                <input type="text" name="guardian2_whatsapp" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian2_whatsapp">WhatsApp</label>
+                <input type="text" id="guardian2_whatsapp" name="guardian2_whatsapp" class="form-control">
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Email</label>
-                <input type="email" name="guardian2_email" class="form-control">
+
+            <div class="form-group">
+                <label for="guardian2_email">Email</label>
+                <input type="email" id="guardian2_email" name="guardian2_email" class="form-control">
             </div>
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Save Student</button>
+        <h3 style="color:#1565c0;">Parent Account</h3>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="parent_username">Parent Username</label>
+                <input type="text" id="parent_username" name="parent_username" class="form-control" placeholder="Leave blank to use Guardian 1 phone">
+            </div>
+
+            <div class="form-group">
+                <label for="parent_password">Parent Password</label>
+                <input type="text" id="parent_password" name="parent_password" class="form-control" placeholder="Leave blank to auto-generate">
+            </div>
+        </div>
+
+        <h3 style="color:#1565c0;">Term Fee Information</h3>
+
+        <div class="card" style="background:#f8fbff; border:1px solid #dbe4ee;">
+            <h4 style="margin-top:0; color:#1565c0;">Term 1</h4>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="term1_amount">Amount</label>
+                    <input type="number" step="0.01" id="term1_amount" name="term1_amount" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term1_paid">Paid</label>
+                    <input type="number" step="0.01" id="term1_paid" name="term1_paid" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term1_due_date">Due Date</label>
+                    <input type="date" id="term1_due_date" name="term1_due_date" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="background:#f8fbff; border:1px solid #dbe4ee;">
+            <h4 style="margin-top:0; color:#1565c0;">Term 2</h4>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="term2_amount">Amount</label>
+                    <input type="number" step="0.01" id="term2_amount" name="term2_amount" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term2_paid">Paid</label>
+                    <input type="number" step="0.01" id="term2_paid" name="term2_paid" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term2_due_date">Due Date</label>
+                    <input type="date" id="term2_due_date" name="term2_due_date" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="background:#f8fbff; border:1px solid #dbe4ee;">
+            <h4 style="margin-top:0; color:#1565c0;">Term 3</h4>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="term3_amount">Amount</label>
+                    <input type="number" step="0.01" id="term3_amount" name="term3_amount" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term3_paid">Paid</label>
+                    <input type="number" step="0.01" id="term3_paid" name="term3_paid" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="term3_due_date">Due Date</label>
+                    <input type="date" id="term3_due_date" name="term3_due_date" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn">Register Student</button>
             <a href="{{ url_for('students') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>

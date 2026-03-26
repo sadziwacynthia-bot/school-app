@@ -1,47 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Teacher Dashboard{% endblock %}
-{% block page_title %}Teacher Dashboard{% endblock %}
-
 {% block content %}
-
-<div class="content-card mb-20">
-    <h2>Welcome, {{ teacher_name }}</h2>
-    <p>This is your teacher dashboard.</p>
+<div class="card">
+    <h1 class="page-title">Teacher Dashboard</h1>
+    <p class="page-subtitle">Welcome to the teacher dashboard.</p>
 </div>
-
-<div class="quick-actions mb-20" style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="/classes" class="btn">My Classes</a>
-    <a href="/attendance" class="btn">Take Attendance</a>
-    <a href="/subjects" class="btn">My Subjects</a>
-    <a href="/assignments" class="btn">Assignments</a>
-</div>
-
-<div class="content-card">
-    <h3>Assigned Classes</h3>
-
-    {% if teacher_classes %}
-    <table>
-        <thead>
-            <tr>
-                <th>Class</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in teacher_classes %}
-            <tr>
-                <td>{{ item.class_name }}</td>
-                <td>
-                    <a href="/class/{{ item.class_name }}" class="btn">Open Class</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No classes assigned yet.</div>
-    {% endif %}
-</div>
-
 {% endblock %}

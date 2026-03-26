@@ -1,168 +1,24 @@
 {% extends "base.html" %}
-
 {% block title %}Student Profile{% endblock %}
-
 {% block content %}
-<h2 class="page-title">Student Profile</h2>
+<div class="card">
+    <h1 class="page-title">Student Profile</h1>
 
-<div class="card p-4 mb-4">
-    <div class="row">
-        <div class="col-md-6">
-            <p><strong>Student Number:</strong> {{ student.student_number }}</p>
-            <p><strong>First Name:</strong> {{ student.first_name }}</p>
-            <p><strong>Last Name:</strong> {{ student.last_name }}</p>
-            <p><strong>Birthday:</strong> {{ student.birthday }}</p>
-            <p><strong>Gender:</strong> {{ student.gender }}</p>
-            <p><strong>Enrollment Date:</strong> {{ student.enrollment_date }}</p>
-        </div>
-        <div class="col-md-6">
-            <p><strong>Class:</strong> {{ student.class_name }}</p>
-            <p><strong>Leaving Year:</strong> {{ student.leaving_year }}</p>
-            <p><strong>Student Phone:</strong> {{ student.student_phone }}</p>
-            <p><strong>Home Address:</strong> {{ student.home_address }}</p>
-            <p><strong>Mailing Address:</strong> {{ student.mailing_address }}</p>
-            <p><strong>Emergency Contact:</strong> {{ student.emergency_contact }}</p>
-        </div>
+    {% if student %}
+    <div class="grid-2">
+        <div><strong>Student Number:</strong> {{ student.student_number }}</div>
+        <div><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</div>
+        <div><strong>Class:</strong> {{ student.class_name }}</div>
+        <div><strong>Type:</strong> {{ student.boarding_status or '-' }}</div>
+        <div><strong>Guardian:</strong> {{ student.guardian1_name or '-' }}</div>
+        <div><strong>Guardian Phone:</strong> {{ student.guardian1_phone or '-' }}</div>
     </div>
+    {% else %}
+    <p>Student not found.</p>
+    {% endif %}
 
-    <hr>
-
-    <h5 class="text-primary">Medical Information</h5>
-    <p>{{ student.medical_info or "No medical information provided." }}</p>
-
-    <div class="mt-3">
-        <a href="{{ url_for('students') }}" class="btn btn-secondary">Back</a>
-        {% if session.get("role") in ["admin", "director"] %}
-        <a href="{{ url_for('edit_student', student_id=student.id) }}" class="btn btn-warning">Edit Student</a>
-        {% endif %}
+    <div style="margin-top:20px;">
+        <a href="{{ url_for('students') }}" class="btn">Back to Students</a>
     </div>
-</div>
-
-<div class="card p-4 mb-4">
-    <h4 class="text-primary mb-3">Parents / Guardians</h4>
-    {% if parents %}
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Relationship</th>
-                        <th>Phone</th>
-                        <th>WhatsApp</th>
-                        <th>Email</th>
-                        <th>Parent Setup Code</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for parent in parents %}
-                    <tr>
-                        <td>{{ parent.full_name }}</td>
-                        <td>{{ parent.relationship }}</td>
-                        <td>{{ parent.phone }}</td>
-                        <td>{{ parent.whatsapp }}</td>
-                        <td>{{ parent.email }}</td>
-                        <td>{{ parent.parent_code }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>No parent/guardian records found.</p>
-    {% endif %}
-</div>
-
-<div class="card p-4 mb-4">
-    <h4 class="text-primary mb-3">Fees</h4>
-    {% if fees %}
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Academic Year</th>
-                        <th>Term</th>
-                        <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Balance</th>
-                        <th>Status</th>
-                        <th>Due Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for fee in fees %}
-                    <tr>
-                        <td>{{ fee.academic_year }}</td>
-                        <td>{{ fee.term }}</td>
-                        <td>{{ fee.amount }}</td>
-                        <td>{{ fee.paid_amount }}</td>
-                        <td>{{ fee.balance }}</td>
-                        <td>{{ fee.status }}</td>
-                        <td>{{ fee.due_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>No fee records found.</p>
-    {% endif %}
-</div>
-
-<div class="card p-4 mb-4">
-    <h4 class="text-primary mb-3">Results</h4>
-    {% if results %}
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Academic Year</th>
-                        <th>Term</th>
-                        <th>Subject</th>
-                        <th>Marks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                    <tr>
-                        <td>{{ result.academic_year }}</td>
-                        <td>{{ result.term }}</td>
-                        <td>{{ result.subject_name }}</td>
-                        <td>{{ result.marks }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>No results found.</p>
-    {% endif %}
-</div>
-
-<div class="card p-4">
-    <h4 class="text-primary mb-3">Attendance History</h4>
-    {% if attendance_records %}
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in attendance_records %}
-                    <tr>
-                        <td>{{ record.date }}</td>
-                        <td>{{ record.status }}</td>
-                        <td>{{ record.remarks }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>No attendance records found.</p>
-    {% endif %}
 </div>
 {% endblock %}

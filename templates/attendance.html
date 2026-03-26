@@ -1,93 +1,20 @@
 {% extends "base.html" %}
-
 {% block title %}Attendance{% endblock %}
-
 {% block content %}
-<h2 class="page-title">Attendance</h2>
+<div class="card">
+    <h1 class="page-title">Attendance</h1>
+    <p class="page-subtitle">Select a class to manage attendance.</p>
 
-<div class="card p-4 mb-4">
-    <h4 class="text-primary mb-3">Record Attendance</h4>
-    <form method="POST" action="{{ url_for('attendance') }}">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Student</label>
-                <select name="student_id" class="form-select" required>
-                    <option value="">Select Student</option>
-                    {% for student in students %}
-                    <option value="{{ student.id }}">
-                        {{ student.first_name }} {{ student.last_name }} - {{ student.class_name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Class</label>
-                <select name="class_name" class="form-select">
-                    <option value="">Select Class</option>
-                    {% for c in classes %}
-                    <option value="{{ c.class_name }}">{{ c.class_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Date</label>
-                <input type="date" name="date" class="form-control" required>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select" required>
-                    <option value="">Select</option>
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                    <option value="Late">Late</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Remarks</label>
-                <input type="text" name="remarks" class="form-control">
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Save Attendance</button>
-        </div>
-    </form>
-</div>
-
-<div class="card p-3">
-    <h4 class="text-primary mb-3">Attendance History</h4>
-
-    {% if attendance_records %}
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Class</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in attendance_records %}
-                <tr>
-                    <td>{{ record.first_name }} {{ record.last_name }}</td>
-                    <td>{{ record.class_name }}</td>
-                    <td>{{ record.date }}</td>
-                    <td>{{ record.status }}</td>
-                    <td>{{ record.remarks }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="form-group">
+        <label>Class</label>
+        <select class="form-control">
+            <option value="">Select Class</option>
+            {% for class_name in class_options %}
+            <option value="{{ class_name }}">{{ class_name }}</option>
+            {% endfor %}
+        </select>
     </div>
-    {% else %}
-        <p>No attendance records found.</p>
-    {% endif %}
+
+    <button class="btn">Continue</button>
 </div>
 {% endblock %}

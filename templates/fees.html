@@ -1,29 +1,39 @@
 {% extends "base.html" %}
-
 {% block title %}Fees{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="page-title mb-0">Fees by Class</h2>
-    {% if session.get("role") in ["admin", "director"] %}
-    <a href="{{ url_for('add_fee') }}" class="btn btn-primary">Add Fee</a>
-    {% endif %}
-</div>
+<h1 class="page-title">Fees</h1>
+<p class="page-subtitle">View student fee records.</p>
 
-<div class="row g-4">
-    {% if classes %}
-        {% for c in classes %}
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <h4 class="text-primary">{{ c.class_name }}</h4>
-                <a href="{{ url_for('fees_by_class', class_name=c.class_name) }}" class="btn btn-primary mt-3">
-                    View Fees
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>No classes found.</p>
-    {% endif %}
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Amount</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fee in fee_records %}
+                <tr>
+                    <td>{{ fee.student_id }}</td>
+                    <td>{{ fee.amount }}</td>
+                    <td>{{ fee.paid_amount }}</td>
+                    <td>{{ fee.balance }}</td>
+                    <td>{{ fee.status }}</td>
+                    <td>{{ fee.due_date or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">No fee records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

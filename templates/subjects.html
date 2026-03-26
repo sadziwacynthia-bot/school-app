@@ -1,35 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Subjects{% endblock %}
-{% block page_title %}Subjects{% endblock %}
-
 {% block content %}
-
-<div class="content-card">
-    <h3>Subject Assignments</h3>
-
-    {% if subject_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Teacher</th>
-                <th>Class</th>
-                <th>Subject</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in subject_records %}
-            <tr>
-                <td>{{ item.full_name }}</td>
-                <td>{{ item.class_name }}</td>
-                <td>{{ item.subject_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No subject assignments yet.</div>
-    {% endif %}
+<div class="card">
+    <h1 class="page-title">Subjects</h1>
+    <p class="page-subtitle">Manage school subjects here.</p>
 </div>
-
 {% endblock %}

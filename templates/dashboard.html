@@ -1,45 +1,124 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Dashboard</h2>
-<p class="text-muted">Welcome, {{ session.get('full_name') }}</p>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card summary-card">
-            <h5>Total Students</h5>
-            <h2>{{ total_students }}</h2>
-        </div>
+<h1 style="margin-bottom:5px;">Dashboard</h1>
+<p style="color:#555; margin-top:0;">Welcome to your School Management System</p>
+
+<!-- 🔷 SUMMARY CARDS -->
+<div class="dashboard-grid">
+
+    <div class="card blue">
+        <h3>Total Students</h3>
+        <p class="number">{{ total_students }}</p>
     </div>
-    <div class="col-md-3">
-        <div class="card summary-card">
-            <h5>Total Teachers</h5>
-            <h2>{{ total_teachers }}</h2>
-        </div>
+
+    <div class="card blue">
+        <h3>Total Teachers</h3>
+        <p class="number">{{ total_teachers }}</p>
     </div>
-    <div class="col-md-3">
-        <div class="card summary-card">
-            <h5>Total Classes</h5>
-            <h2>{{ total_classes }}</h2>
-        </div>
+
+    <div class="card blue">
+        <h3>Total Users</h3>
+        <p class="number">{{ total_users }}</p>
     </div>
-    <div class="col-md-3">
-        <div class="card summary-card">
-            <h5>Total Users</h5>
-            <h2>{{ total_users }}</h2>
-        </div>
+
+    <div class="card blue">
+        <h3>Fee Records</h3>
+        <p class="number">{{ total_fee_records }}</p>
     </div>
+
 </div>
 
-<div class="card p-4">
-    <h4 class="mb-3 text-primary">Quick Actions</h4>
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{{ url_for('add_student') }}" class="btn btn-primary">Register Student</a>
-        <a href="{{ url_for('register_teacher') }}" class="btn btn-success">Register Teacher</a>
-        <a href="{{ url_for('add_fee') }}" class="btn btn-warning">Add Fee</a>
-        <a href="{{ url_for('results') }}" class="btn btn-info">Enter Results</a>
-    </div>
+<!-- 🔷 QUICK ACTIONS -->
+<h2 style="margin-top:30px;">Quick Actions</h2>
+
+<div class="action-grid">
+
+    <a href="{{ url_for('add_student') }}" class="action-card">
+        ➕ Add Student
+    </a>
+
+    <a href="{{ url_for('students') }}" class="action-card">
+        👩‍🎓 View Students
+    </a>
+
+    <a href="{{ url_for('classes') }}" class="action-card">
+        🏫 Classes
+    </a>
+
+    <a href="{{ url_for('fees') }}" class="action-card">
+        💰 Fees
+    </a>
+
+    <a href="{{ url_for('teacher_registration') }}" class="action-card">
+        👨‍🏫 Add Teacher
+    </a>
+
+    <a href="{{ url_for('users') }}" class="action-card">
+        👥 Users
+    </a>
+
 </div>
+
+<style>
+/* GRID */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* CARDS */
+.card {
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+}
+
+.card.blue {
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.number {
+    font-size: 28px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* ACTIONS */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.action-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #1565c0;
+    font-weight: bold;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+}
+
+.action-card:hover {
+    background: #1565c0;
+    color: white;
+}
+
+</style>
+
 {% endblock %}

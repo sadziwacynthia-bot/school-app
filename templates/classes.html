@@ -1,24 +1,14 @@
 {% extends "base.html" %}
-
 {% block title %}Classes{% endblock %}
-
 {% block content %}
-<h2 class="page-title">Classes</h2>
+<h1 class="page-title">Classes</h1>
+<p class="page-subtitle">Choose a class to view its students.</p>
 
-<div class="row g-4">
-    {% if classes %}
-        {% for c in classes %}
-        <div class="col-md-4">
-            <div class="card p-4 text-center">
-                <h4 class="text-primary">{{ c.class_name }}</h4>
-                <a href="{{ url_for('class_students', class_name=c.class_name) }}" class="btn btn-primary mt-3">
-                    View Students
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>No classes found.</p>
-    {% endif %}
+<div class="class-grid">
+    {% for class_name in class_options %}
+    <a href="{{ url_for('class_students', class_name=class_name) }}" class="class-card">
+        {{ class_name }}
+    </a>
+    {% endfor %}
 </div>
-{% endblock %}s
+{% endblock %}

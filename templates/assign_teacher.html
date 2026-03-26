@@ -1,67 +1,8 @@
 {% extends "base.html" %}
-
 {% block title %}Assign Teacher{% endblock %}
-{% block page_title %}Assign Teacher to Class{% endblock %}
-
 {% block content %}
-
-<div class="content-card mb-20">
-    <form method="POST" action="/assign_teacher">
-        <div class="grid mb-20">
-            <div>
-                <label>Select Teacher</label>
-                <select name="user_id" required>
-                    <option value="">Choose teacher</option>
-                    {% for teacher in teachers %}
-                        <option value="{{ teacher.id }}">
-                            {{ teacher.full_name }} ({{ teacher.username }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label>Select Class</label>
-                <select name="class_name" required>
-                    <option value="">Choose class</option>
-                    {% for class_item in classes %}
-                        <option value="{{ class_item.class_name }}">
-                            {{ class_item.class_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <button type="submit" class="btn">Assign Teacher</button>
-    </form>
+<div class="card">
+    <h1 class="page-title">Assign Teacher</h1>
+    <p class="page-subtitle">Assign teachers to classes and subjects.</p>
 </div>
-
-<div class="content-card">
-    <h3>Current Teacher Assignments</h3>
-
-    {% if assignments %}
-    <table>
-        <thead>
-            <tr>
-                <th>Teacher Name</th>
-                <th>Username</th>
-                <th>Class</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in assignments %}
-            <tr>
-                <td>{{ item.full_name }}</td>
-                <td>{{ item.username }}</td>
-                <td>{{ item.class_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-box">No teacher assignments yet.</div>
-    {% endif %}
-</div>
-
 {% endblock %}
