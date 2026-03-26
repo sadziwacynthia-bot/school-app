@@ -1,14 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Classes{% endblock %}
+
 {% block content %}
-<h1 class="page-title">Classes</h1>
-<p class="page-subtitle">Choose a class to view its students.</p>
+
+<h1>Classes</h1>
+<p style="color:#555;">Select a class to view students</p>
 
 <div class="class-grid">
+
     {% for class_name in class_options %}
-    <a href="{{ url_for('class_students', class_name=class_name) }}" class="class-card">
-        {{ class_name }}
-    </a>
+        <a href="{{ url_for('class_students', class_name=class_name) }}" class="class-btn">
+            {{ class_name }}
+        </a>
     {% endfor %}
+
 </div>
+
+<style>
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.class-btn {
+    display: block;
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #1565c0, #1e88e5);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.class-btn:hover {
+    background: linear-gradient(135deg, #0d47a1, #1565c0);
+    transform: translateY(-2px);
+}
+</style>
+
 {% endblock %}
