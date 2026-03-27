@@ -15,9 +15,13 @@ columns_to_add = [
     ("student_phone", "TEXT"),
     ("medical_info", "TEXT"),
     ("emergency_contact", "TEXT"),
+
+    ("guardian1_name", "TEXT"),
     ("guardian1_relationship", "TEXT"),
+    ("guardian1_phone", "TEXT"),
     ("guardian1_whatsapp", "TEXT"),
     ("guardian1_email", "TEXT"),
+
     ("guardian2_name", "TEXT"),
     ("guardian2_relationship", "TEXT"),
     ("guardian2_phone", "TEXT"),
