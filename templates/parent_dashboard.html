@@ -1,8 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Parent Dashboard{% endblock %}
+
 {% block content %}
 <div class="card">
     <h1 class="page-title">Parent Dashboard</h1>
-    <p class="page-subtitle">Welcome to the parent dashboard.</p>
+    <p class="page-subtitle">Welcome to your child’s school portal.</p>
+
+    {% if student %}
+    <div class="grid-2">
+        <div><strong>Student Number:</strong> {{ student.student_number }}</div>
+        <div><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</div>
+        <div><strong>Class:</strong> {{ student.class_name }}</div>
+        <div><strong>Student Type:</strong> {{ student.boarding_status or '-' }}</div>
+    </div>
+
+    <div style="margin-top: 20px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{{ url_for('parent_fees') }}" class="btn">Fees</a>
+        <a href="{{ url_for('parent_attendance') }}" class="btn">Attendance</a>
+        <a href="{{ url_for('parent_results') }}" class="btn">Results</a>
+        <a href="{{ url_for('parent_assignments') }}" class="btn">Assignments</a>
+    </div>
+    {% else %}
+    <p>No child is linked to this parent account yet.</p>
+    {% endif %}
 </div>
 {% endblock %}

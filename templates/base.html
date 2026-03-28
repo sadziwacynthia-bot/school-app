@@ -140,13 +140,13 @@
             <a href="{{ url_for('assignments') }}">Assignments</a>
             <a href="{{ url_for('logout') }}">Logout</a>
 
-        {% elif session.get('role') == 'parent' %}
-            <a href="{{ url_for('parent_dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('parent_fees') }}">Fees</a>
-            <a href="{{ url_for('parent_attendance') }}">Attendance</a>
-            <a href="{{ url_for('parent_results') }}">Results</a>
-            <a href="{{ url_for('parent_assignments') }}">Assignments</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+       {% elif session.get('role') == 'parent' %}
+    <a href="{{ url_for('parent_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('parent_fees') }}">Fees</a>
+    <a href="{{ url_for('parent_attendance') }}">Attendance</a>
+    <a href="{{ url_for('parent_results') }}">Results</a>
+    <a href="{{ url_for('parent_assignments') }}">Assignments</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
 
         {% else %}
             <a href="{{ url_for('index') }}">Home</a>
