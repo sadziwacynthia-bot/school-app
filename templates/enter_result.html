@@ -1,27 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Enter Results{% endblock %}
+
 {% block content %}
-<div class="card">
-    <h1 class="page-title">Enter Results</h1>
-    <p class="page-subtitle">Choose class and enter student results.</p>
+<div class="container">
+    <h2>Enter Student Result</h2>
 
-    <div class="grid-2">
-        <div class="form-group">
-            <label>Class</label>
-            <select class="form-control">
-                <option value="">Select Class</option>
-                {% for class_name in class_options %}
+    <form method="POST" action="{{ url_for('save_result') }}">
+        <label>Student</label>
+        <select name="student_id" required>
+            <option value="">Select student</option>
+            {% for student in students %}
+                <option value="{{ student.id }}">
+                    {{ student.first_name }} {{ student.last_name }} - {{ student.class_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Class</label>
+        <select name="class_name" required>
+            <option value="">Select class</option>
+            {% for class_name in class_options %}
                 <option value="{{ class_name }}">{{ class_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+            {% endfor %}
+        </select>
 
-        <div class="form-group">
-            <label>Subject</label>
-            <input type="text" class="form-control" placeholder="Enter subject">
-        </div>
-    </div>
+        <label>Subject</label>
+        <select name="subject" required>
+            <option value="">Select subject</option>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
 
-    <button class="btn">Open Result Entry</button>
+        <label>Term</label>
+        <select name="term" required>
+            <option value="">Select term</option>
+            <option value="Term 1">Term 1</option>
+            <option value="Term 2">Term 2</option>
+            <option value="Term 3">Term 3</option>
+        </select>
+
+        <label>Marks</label>
+        <input type="number" name="marks" min="0" max="100" required>
+
+        <button type="submit">Save Result</button>
+    </form>
 </div>
 {% endblock %}

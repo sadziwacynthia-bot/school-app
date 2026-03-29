@@ -113,7 +113,34 @@ def ensure_tables():
             email TEXT
         )
     """)
-
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            class_name TEXT,
+            subject TEXT,
+            term TEXT,
+            marks REAL,
+            grade TEXT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER,
+            class_name TEXT,
+            date TEXT,
+            status TEXT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS teacher_assignments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            teacher_id INTEGER,
+            class_name TEXT,
+            subject TEXT
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -137,16 +164,39 @@ def ensure_tables():
         ("guardian2_whatsapp", "TEXT"),
         ("guardian2_email", "TEXT"),
     ]
+    result_columns = [
+        ("class_name", "TEXT"),
+        ("subject", "TEXT"),
+        ("term", "TEXT"),
+        ("marks", "REAL"),
+        ("grade", "TEXT"),
+    ]
+
+    for column_name, column_type in result_columns:
+        add_column_if_missing("results", column_name, column_type)
 
     guardian_columns = [
         ("relationship", "TEXT"),
         ("whatsapp", "TEXT"),
         ("email", "TEXT"),
     ]
-
+    attendance_columns = [
+        ("class_name", "TEXT"),
+        ("date", "TEXT"),
+        ("status", "TEXT"),
+    ]
+    for column_name, column_type in attendance_columns:
+        add_column_if_missing("attendance", column_name, column_type)
+    
     fee_columns = [
         ("term_name", "TEXT"),
     ]
+    teacher_assignment_columns = [
+        ("class_name", "TEXT"),
+        ("subject", "TEXT"),
+    ]
+    for column_name, column_type in teacher_assignment_columns:
+        add_column_if_missing("teacher_assignments", column_name, column_type)
 
     for column_name, column_type in student_columns:
         add_column_if_missing("students", column_name, column_type)
@@ -557,8 +607,31 @@ def teacher_registration():
 @login_required
 @roles_required("teacher")
 def teacher_dashboard():
-    return render_template("teacher_dashboard.html")
+    conn = get_db()
+    cursor = conn.cursor()
 
+    teacher = cursor.execute("""
+        SELECT * FROM teachers
+        WHERE user_id = ?
+        LIMIT 1
+    """, (session["user_id"],)).fetchone()
+
+    assignments = []
+    if teacher:
+        assignments = cursor.execute("""
+            SELECT *
+            FROM teacher_assignments
+            WHERE teacher_id = ?
+            ORDER BY class_name, subject
+        """, (teacher["id"],)).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "teacher_dashboard.html",
+        teacher=teacher,
+        assignments=assignments
+    )
 
 # =========================================================
 # FEES / USERS
@@ -614,13 +687,49 @@ def assign_subject():
     return render_template("assign_subject.html")
 
 
-@app.route("/assign_teacher")
+@app.route("/assign_teacher", methods=["GET", "POST"])
 @login_required
 @roles_required("admin", "director")
 def assign_teacher():
-    return render_template("assign_teacher.html")
+    conn = get_db()
+    cursor = conn.cursor()
 
+    if request.method == "POST":
+        teacher_id = request.form.get("teacher_id")
+        class_name = request.form.get("class_name")
+        subject = request.form.get("subject")
 
+        cursor.execute("""
+            INSERT INTO teacher_assignments (teacher_id, class_name, subject)
+            VALUES (?, ?, ?)
+        """, (teacher_id, class_name, subject))
+
+        conn.commit()
+        flash("Teacher assigned successfully.", "success")
+        return redirect(url_for("assign_teacher"))
+
+    teachers = cursor.execute("""
+        SELECT * FROM teachers ORDER BY full_name
+    """).fetchall()
+
+    assignments = cursor.execute("""
+        SELECT ta.*, t.full_name
+        FROM teacher_assignments ta
+        JOIN teachers t ON ta.teacher_id = t.id
+        ORDER BY t.full_name, ta.class_name, ta.subject
+    """).fetchall()
+
+    conn.close()
+
+    subjects = ["Math", "English", "Science", "History", "Geography", "Biology"]
+
+    return render_template(
+        "assign_teacher.html",
+        teachers=teachers,
+        class_options=CLASS_OPTIONS,
+        subjects=subjects,
+        assignments=assignments
+    )
 @app.route("/assign_parent")
 @login_required
 @roles_required("admin", "director")
@@ -628,25 +737,160 @@ def assign_parent():
     return render_template("assign_parent.html")
 
 
-@app.route("/attendance")
+@app.route("/attendance", methods=["GET", "POST"])
 @login_required
 @roles_required("admin", "director", "teacher")
 def attendance():
-    return render_template("attendance.html", class_options=CLASS_OPTIONS)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    selected_class = request.form.get("class_name") if request.method == "POST" else request.args.get("class_name")
+    students = []
+
+    if selected_class:
+        cursor.execute("""
+            SELECT * FROM students
+            WHERE class_name = ?
+            ORDER BY first_name, last_name
+        """, (selected_class,))
+        students = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "attendance.html",
+        class_options=CLASS_OPTIONS,
+        selected_class=selected_class,
+        students=students
+    )
+
+@app.route("/save_attendance", methods=["POST"])
+@login_required
+@roles_required("admin", "director", "teacher")
+def save_attendance():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    class_name = request.form.get("class_name")
+    date = request.form.get("date")
+    student_ids = request.form.getlist("student_id")
+
+    try:
+        for student_id in student_ids:
+            status = request.form.get(f"status_{student_id}")
+
+            cursor.execute("""
+                INSERT INTO attendance (student_id, class_name, date, status)
+                VALUES (?, ?, ?, ?)
+            """, (student_id, class_name, date, status))
+
+        conn.commit()
+        flash("Attendance saved successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error saving attendance: {str(e)}", "danger")
+    finally:
+        conn.close()
+
+    return redirect(url_for("attendance", class_name=class_name))
+
+@app.route("/attendance_records")
+@login_required
+@roles_required("admin", "director", "teacher")
+def attendance_records():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT a.*, s.first_name, s.last_name, s.student_number
+        FROM attendance a
+        JOIN students s ON a.student_id = s.id
+        ORDER BY a.date DESC, s.first_name, s.last_name
+    """)
+    attendance_records = cursor.fetchall()
+
+    conn.close()
+
+    return render_template("attendance_records.html", attendance_records=attendance_records)
 
 
 @app.route("/enter_result")
 @login_required
 @roles_required("admin", "director", "teacher")
 def enter_result():
-    return render_template("enter_result.html", class_options=CLASS_OPTIONS)
+    conn = get_db()
+    students = conn.execute(
+        "SELECT * FROM students ORDER BY first_name, last_name"
+    ).fetchall()
+    conn.close()
+
+    subjects = ["Math", "English", "Science", "History", "Geography", "Biology"]
+
+    return render_template(
+        "enter_result.html",
+        class_options=CLASS_OPTIONS,
+        students=students,
+        subjects=subjects
+    )
+
+@app.route("/save_result", methods=["POST"])
+@login_required
+@roles_required("admin", "director", "teacher")
+def save_result():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    student_id = request.form.get("student_id")
+    class_name = request.form.get("class_name")
+    subject = request.form.get("subject")
+    term = request.form.get("term")
+    marks = request.form.get("marks")
+
+    try:
+        marks = float(marks)
+    except:
+        marks = 0
+
+    if marks >= 80:
+        grade = "A"
+    elif marks >= 70:
+        grade = "B"
+    elif marks >= 60:
+        grade = "C"
+    elif marks >= 50:
+        grade = "D"
+    else:
+        grade = "F"
+
+    cursor.execute("""
+        INSERT INTO results (student_id, class_name, subject, term, marks, grade)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (student_id, class_name, subject, term, marks, grade))
+
+    conn.commit()
+    conn.close()
+
+    flash("Result saved successfully.", "success")
+    return redirect(url_for("results"))
 
 
 @app.route("/results")
 @login_required
 @roles_required("admin", "director", "teacher")
 def results():
-    return render_template("results.html")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT r.*, s.first_name, s.last_name, s.student_number
+        FROM results r
+        JOIN students s ON r.student_id = s.id
+        ORDER BY s.first_name, s.last_name, r.subject
+    """)
+    result_records = cursor.fetchall()
+
+    conn.close()
+    return render_template("results.html", result_records=result_records)
 
 
 @app.route("/assignments")

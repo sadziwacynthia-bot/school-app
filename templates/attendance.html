@@ -1,20 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Attendance{% endblock %}
-{% block content %}
-<div class="card">
-    <h1 class="page-title">Attendance</h1>
-    <p class="page-subtitle">Select a class to manage attendance.</p>
 
-    <div class="form-group">
-        <label>Class</label>
-        <select class="form-control">
-            <option value="">Select Class</option>
+{% block content %}
+<div class="container">
+    <h2>Take Attendance</h2>
+
+    <form method="POST" action="{{ url_for('attendance') }}" class="select-form">
+        <label>Select Class</label>
+        <select name="class_name" required>
+            <option value="">Select class</option>
             {% for class_name in class_options %}
-            <option value="{{ class_name }}">{{ class_name }}</option>
+                <option value="{{ class_name }}" {% if selected_class == class_name %}selected{% endif %}>
+                    {{ class_name }}
+                </option>
             {% endfor %}
         </select>
-    </div>
+        <button type="submit">Load Students</button>
+    </form>
 
-    <button class="btn">Continue</button>
+    {% if students %}
+    <form method="POST" action="{{ url_for('save_attendance') }}" class="attendance-form">
+        <input type="hidden" name="class_name" value="{{ selected_class }}">
+
+        <label>Date</label>
+        <input type="date" name="date" required>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student Number</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.first_name }} {{ student.last_name }}</td>
+                    <td>{{ student.student_number }}</td>
+                    <td>
+                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                        <select name="status_{{ student.id }}" required>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Late">Late</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit">Save Attendance</button>
+    </form>
+    {% endif %}
 </div>
 {% endblock %}

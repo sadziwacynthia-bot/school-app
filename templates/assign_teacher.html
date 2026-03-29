@@ -1,8 +1,62 @@
 {% extends "base.html" %}
-{% block title %}Assign Teacher{% endblock %}
+
 {% block content %}
-<div class="card">
-    <h1 class="page-title">Assign Teacher</h1>
-    <p class="page-subtitle">Assign teachers to classes and subjects.</p>
+<div class="container">
+    <h2>Assign Teacher to Class and Subject</h2>
+
+    <form method="POST" class="form-card">
+        <label>Teacher</label>
+        <select name="teacher_id" required>
+            <option value="">Select teacher</option>
+            {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Class</label>
+        <select name="class_name" required>
+            <option value="">Select class</option>
+            {% for class_name in class_options %}
+                <option value="{{ class_name }}">{{ class_name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Subject</label>
+        <select name="subject" required>
+            <option value="">Select subject</option>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Assignment</button>
+    </form>
+
+    <div class="table-card">
+        <h3>Current Teacher Assignments</h3>
+
+        {% if assignments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in assignments %}
+                <tr>
+                    <td>{{ row.full_name }}</td>
+                    <td>{{ row.class_name }}</td>
+                    <td>{{ row.subject }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No teacher assignments yet.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

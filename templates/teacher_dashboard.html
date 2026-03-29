@@ -1,8 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Teacher Dashboard{% endblock %}
+
 {% block content %}
-<div class="card">
-    <h1 class="page-title">Teacher Dashboard</h1>
-    <p class="page-subtitle">Welcome to the teacher dashboard.</p>
+<div class="container">
+    <h2>Teacher Dashboard</h2>
+
+    {% if teacher %}
+    <div class="card">
+        <h3>{{ teacher.full_name }}</h3>
+        <p><strong>Teacher ID:</strong> {{ teacher.teacher_id }}</p>
+        <p><strong>Phone:</strong> {{ teacher.phone or "Not set" }}</p>
+        <p><strong>Email:</strong> {{ teacher.email or "Not set" }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Assigned Classes and Subjects</h3>
+
+        {% if assignments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in assignments %}
+                <tr>
+                    <td>{{ row.class_name }}</td>
+                    <td>{{ row.subject }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No assignments yet.</p>
+        {% endif %}
+    </div>
+    {% else %}
+        <p>Teacher profile not found.</p>
+    {% endif %}
 </div>
 {% endblock %}
