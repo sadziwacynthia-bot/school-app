@@ -729,10 +729,31 @@ def parent_dashboard():
     """, (session["user_id"],))
 
     student = cursor.fetchone()
+
+    fee_summary = {
+        "total_amount": 0,
+        "total_paid": 0,
+        "total_balance": 0
+    }
+
+    if student:
+        cursor.execute("""
+            SELECT
+                COALESCE(SUM(amount), 0) AS total_amount,
+                COALESCE(SUM(paid_amount), 0) AS total_paid,
+                COALESCE(SUM(balance), 0) AS total_balance
+            FROM fees
+            WHERE student_id = ?
+        """, (student["id"],))
+        fee_summary = cursor.fetchone()
+
     conn.close()
 
-    return render_template("parent_dashboard.html", student=student)
-
+    return render_template(
+        "parent_dashboard.html",
+        student=student,
+        fee_summary=fee_summary
+    )
 
 @app.route("/parent_fees")
 @login_required
