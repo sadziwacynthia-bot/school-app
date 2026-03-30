@@ -1,31 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Add Assignment{% endblock %}
+
 {% block content %}
-<div class="card">
-    <h1 class="page-title">Add Assignment</h1>
+<div class="container">
+    <h2>Add Assignment</h2>
 
-    <div class="grid-2">
-        <div class="form-group">
-            <label>Title</label>
-            <input type="text" class="form-control">
-        </div>
+    <form method="POST">
+        <label>Class</label>
+        <select name="class_name" required>
+            <option value="">Select class</option>
+            {% for class_name in class_options %}
+                <option value="{{ class_name }}">{{ class_name }}</option>
+            {% endfor %}
+        </select>
 
-        <div class="form-group">
-            <label>Class</label>
-            <input type="text" class="form-control">
-        </div>
+        <label>Subject</label>
+        <select name="subject" required>
+            <option value="">Select subject</option>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
 
-        <div class="form-group">
-            <label>Subject</label>
-            <input type="text" class="form-control">
-        </div>
+        <label>Title</label>
+        <input type="text" name="title" required>
 
-        <div class="form-group">
-            <label>Due Date</label>
-            <input type="date" class="form-control">
-        </div>
-    </div>
+        <label>Description</label>
+        <textarea name="description" rows="5" required></textarea>
 
-    <button class="btn">Save Assignment</button>
+        <label>Due Date</label>
+        <input type="date" name="due_date" required>
+
+        <button type="submit">Save Assignment</button>
+    </form>
 </div>
 {% endblock %}

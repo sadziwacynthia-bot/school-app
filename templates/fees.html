@@ -1,39 +1,207 @@
 {% extends "base.html" %}
-{% block title %}Fees{% endblock %}
-{% block content %}
-<h1 class="page-title">Fees</h1>
-<p class="page-subtitle">View student fee records.</p>
 
+{% block content %}
+<div class="page-header">
+    <h1>Fees Management</h1>
+    <p>View all student fee records by class and term.</p>
+</div>
+<div class="search-card">
+    <form method="GET" action="{{ url_for('fees') }}" class="search-form">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Search by student name or student number"
+            value="{{ search or '' }}"
+        >
+        <button type="submit">Search</button>
+        <a href="{{ url_for('fees') }}" class="clear-btn">Clear</a>
+    </form>
+</div>
 <div class="card">
+    {% if fee_records %}
     <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
-                    <th>Student ID</th>
-                    <th>Amount</th>
+                    <th>Student Number</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>Term</th>
+                    <th>Total Fee</th>
                     <th>Paid</th>
                     <th>Balance</th>
                     <th>Status</th>
                     <th>Due Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for fee in fee_records %}
                 <tr>
-                    <td>{{ fee.student_id }}</td>
-                    <td>{{ fee.amount }}</td>
-                    <td>{{ fee.paid_amount }}</td>
-                    <td>{{ fee.balance }}</td>
-                    <td>{{ fee.status }}</td>
-                    <td>{{ fee.due_date or '-' }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6">No fee records found.</td>
+                    <td>{{ fee.student_number }}</td>
+                    <td>{{ fee.first_name }} {{ fee.last_name }}</td>
+                    <td>{{ fee.class_name }}</td>
+                    <td>{{ fee.term_name or "Not set" }}</td>
+                    <td>${{ fee.amount }}</td>
+                    <td>${{ fee.paid_amount }}</td>
+                    <td>${{ fee.balance }}</td>
+                    <td>
+                        <span class="status-badge 
+                            {% if fee.status == 'Paid' %}paid
+                            {% elif fee.status == 'Partially Paid' %}partial
+                            {% else %}pending{% endif %}">
+                            {{ fee.status }}
+                        </span>
+                    </td>
+                    <td>{{ fee.due_date or "-" }}</td>
+                    <td>
+    <a href="{{ url_for('update_fee', fee_id=fee.id) }}" class="action-btn">Update Payment</a>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% else %}
+        <p>No fee records found yet.</p>
+    {% endif %}
 </div>
+
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 30px;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+th, td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-badge.paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.partial {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.pending {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.action-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    background: #1e40af;
+}
+.search-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 260px;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.search-form button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-form button:hover {
+    background: #1e40af;
+}
+
+.clear-btn {
+    display: inline-block;
+    background: #e5e7eb;
+    color: #111827;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.clear-btn:hover {
+    background: #d1d5db;
+}
+
+</style>
 {% endblock %}

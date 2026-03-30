@@ -141,6 +141,26 @@ def ensure_tables():
             subject TEXT
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS assignments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            class_name TEXT,
+            subject TEXT,
+            title TEXT,
+            description TEXT,
+            due_date TEXT,
+            created_by TEXT
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fee_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fee_id INTEGER,
+            payment_date TEXT,
+            amount_paid REAL,
+            receipt_number TEXT
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -185,6 +205,25 @@ def ensure_tables():
         ("date", "TEXT"),
         ("status", "TEXT"),
     ]
+    assignment_columns = [
+        ("class_name", "TEXT"),
+        ("subject", "TEXT"),
+        ("title", "TEXT"),
+        ("description", "TEXT"),
+        ("due_date", "TEXT"),
+        ("created_by", "TEXT"),
+    ]
+    fee_payment_columns = [
+        ("payment_date", "TEXT"),
+        ("amount_paid", "REAL"),
+        ("receipt_number", "TEXT"),
+    ]
+    for column_name, column_type in fee_payment_columns:
+        add_column_if_missing("fee_payments", column_name, column_type)
+
+    for column_name, column_type in assignment_columns:
+        add_column_if_missing("assignments", column_name, column_type)
+    
     for column_name, column_type in attendance_columns:
         add_column_if_missing("attendance", column_name, column_type)
     
@@ -641,10 +680,100 @@ def teacher_dashboard():
 @roles_required("admin", "director")
 def fees():
     conn = get_db()
-    fee_records = conn.execute("SELECT * FROM fees").fetchall()
-    conn.close()
-    return render_template("fees.html", fee_records=fee_records)
+    cursor = conn.cursor()
 
+    search = request.args.get("search", "").strip()
+
+    query = """
+        SELECT 
+            f.*,
+            s.first_name,
+            s.last_name,
+            s.student_number,
+            s.class_name
+        FROM fees f
+        JOIN students s ON f.student_id = s.id
+    """
+
+    params = []
+
+    if search:
+        query += """
+            WHERE
+                s.first_name LIKE ?
+                OR s.last_name LIKE ?
+                OR s.student_number LIKE ?
+        """
+        like_search = f"%{search}%"
+        params.extend([like_search, like_search, like_search])
+
+    query += " ORDER BY s.class_name, s.first_name, s.last_name, f.term_name"
+
+    cursor.execute(query, params)
+    fee_records = cursor.fetchall()
+
+    conn.close()
+    return render_template("fees.html", fee_records=fee_records, search=search)
+
+@app.route("/update_fee/<int:fee_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin", "director")
+def update_fee(fee_id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            f.*,
+            s.first_name,
+            s.last_name,
+            s.student_number,
+            s.class_name
+        FROM fees f
+        JOIN students s ON f.student_id = s.id
+        WHERE f.id = ?
+    """, (fee_id,))
+    fee = cursor.fetchone()
+
+    if not fee:
+        conn.close()
+        flash("Fee record not found.", "danger")
+        return redirect(url_for("fees"))
+
+    if request.method == "POST":
+        additional_payment = request.form.get("additional_payment", 0)
+
+        try:
+            additional_payment = float(additional_payment or 0)
+        except:
+            additional_payment = 0
+
+        new_paid_amount = float(fee["paid_amount"] or 0) + additional_payment
+        total_amount = float(fee["amount"] or 0)
+        new_balance = total_amount - new_paid_amount
+
+        if new_balance <= 0:
+            new_balance = 0
+            status = "Paid"
+        elif new_paid_amount > 0:
+            status = "Partially Paid"
+        else:
+            status = "Pending"
+
+        cursor.execute("""
+            UPDATE fees
+            SET paid_amount = ?, balance = ?, status = ?
+            WHERE id = ?
+        """, (new_paid_amount, new_balance, status, fee_id))
+
+        conn.commit()
+        conn.close()
+
+        flash("Fee payment updated successfully.", "success")
+        return redirect(url_for("fees"))
+
+    conn.close()
+    return render_template("update_fee.html", fee=fee)
 
 @app.route("/users")
 @login_required
@@ -897,15 +1026,52 @@ def results():
 @login_required
 @roles_required("admin", "director", "teacher")
 def assignments():
-    return render_template("assignments.html")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM assignments
+        ORDER BY due_date ASC, class_name ASC, subject ASC
+    """)
+    assignments_list = cursor.fetchall()
+
+    conn.close()
+    return render_template("assignments.html", assignments=assignments_list)
 
 
-@app.route("/add_assignment")
+@app.route("/add_assignment", methods=["GET", "POST"])
 @login_required
 @roles_required("admin", "director", "teacher")
 def add_assignment():
-    return render_template("add_assignment.html")
+    if request.method == "POST":
+        conn = get_db()
+        cursor = conn.cursor()
 
+        class_name = request.form.get("class_name")
+        subject = request.form.get("subject")
+        title = request.form.get("title")
+        description = request.form.get("description")
+        due_date = request.form.get("due_date")
+        created_by = session.get("full_name")
+
+        cursor.execute("""
+            INSERT INTO assignments (class_name, subject, title, description, due_date, created_by)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (class_name, subject, title, description, due_date, created_by))
+
+        conn.commit()
+        conn.close()
+
+        flash("Assignment added successfully.", "success")
+        return redirect(url_for("assignments"))
+
+    subjects = ["Math", "English", "Science", "History", "Geography", "Biology"]
+    return render_template(
+        "add_assignment.html",
+        class_options=CLASS_OPTIONS,
+        subjects=subjects
+    )
 
 # =========================================================
 # PARENT PORTAL
@@ -1108,8 +1274,70 @@ def parent_assignments():
         assignments=assignments_list,
         student=student
     )
+@app.route("/delete_student/<int:id>", methods=["POST"])
+@login_required
+@roles_required("admin", "director")
+def delete_student(id):
+    conn = get_db()
+    cursor = conn.cursor()
 
+    try:
+        cursor.execute("DELETE FROM fees WHERE student_id = ?", (id,))
+        cursor.execute("DELETE FROM guardians WHERE student_id = ?", (id,))
+        cursor.execute("DELETE FROM students WHERE id = ?", (id,))
 
+        conn.commit()
+        flash("Student deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting student: {str(e)}", "danger")
+    finally:
+        conn.close()
+
+    return redirect(url_for("students"))
+@app.route("/delete_teacher/<int:id>", methods=["POST"])
+@login_required
+@roles_required("admin", "director")
+def delete_teacher(id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT user_id FROM teachers WHERE id = ?", (id,))
+        teacher = cursor.fetchone()
+
+        if teacher:
+            cursor.execute("DELETE FROM teachers WHERE id = ?", (id,))
+            cursor.execute("DELETE FROM users WHERE id = ?", (teacher["user_id"],))
+            conn.commit()
+            flash("Teacher deleted successfully.", "success")
+        else:
+            flash("Teacher not found.", "danger")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting teacher: {str(e)}", "danger")
+    finally:
+        conn.close()
+
+    return redirect(url_for("teachers"))
+@app.route("/delete_user/<int:id>", methods=["POST"])
+@login_required
+@roles_required("admin", "director")
+def delete_user(id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM users WHERE id = ?", (id,))
+        conn.commit()
+        flash("User deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting user: {str(e)}", "danger")
+    finally:
+        conn.close()
+
+    return redirect(url_for("users"))
 # =========================================================
 # RUN
 # =========================================================

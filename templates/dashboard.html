@@ -1,124 +1,183 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-
-<h1 style="margin-bottom:5px;">Dashboard</h1>
-<p style="color:#555; margin-top:0;">Welcome to your School Management System</p>
-
-<!-- 🔷 SUMMARY CARDS -->
-<div class="dashboard-grid">
-
-    <div class="card blue">
-        <h3>Total Students</h3>
-        <p class="number">{{ total_students }}</p>
+<div class="dashboard-page">
+    <div class="page-header">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p>
+                Welcome{% if session.full_name %}, {{ session.full_name }}{% endif %}.
+                Here is a quick view of your school system.
+            </p>
+        </div>
     </div>
 
-    <div class="card blue">
-        <h3>Total Teachers</h3>
-        <p class="number">{{ total_teachers }}</p>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">Total Students</div>
+            <div class="stat-value">{{ total_students }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Total Teachers</div>
+            <div class="stat-value">{{ total_teachers }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Total Users</div>
+            <div class="stat-value">{{ total_users }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Fee Records</div>
+            <div class="stat-value">{{ total_fee_records }}</div>
+        </div>
     </div>
 
-    <div class="card blue">
-        <h3>Total Users</h3>
-        <p class="number">{{ total_users }}</p>
+    <div class="dashboard-grid">
+        <div class="card">
+            <h2>Quick Actions</h2>
+            <div class="quick-links">
+                <a href="{{ url_for('add_student') }}" class="quick-link">Add Student</a>
+                <a href="{{ url_for('students') }}" class="quick-link">View Students</a>
+                <a href="{{ url_for('teacher_registration') }}" class="quick-link">Register Teacher</a>
+                <a href="{{ url_for('teachers') }}" class="quick-link">View Teachers</a>
+                <a href="{{ url_for('fees') }}" class="quick-link">View Fees</a>
+                <a href="{{ url_for('classes') }}" class="quick-link">View Classes</a>
+                <a href="{{ url_for('attendance') }}" class="quick-link">Attendance</a>
+                <a href="{{ url_for('results') }}" class="quick-link">Results</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>System Notes</h2>
+            <div class="notes-box">
+                <p><strong>Students:</strong> Manage student records, profiles, and class placement.</p>
+                <p><strong>Teachers:</strong> Register teachers and track teaching staff.</p>
+                <p><strong>Fees:</strong> View and manage fee records in one place.</p>
+                <p><strong>Attendance & Results:</strong> Continue building your academic tracking features.</p>
+            </div>
+        </div>
     </div>
-
-    <div class="card blue">
-        <h3>Fee Records</h3>
-        <p class="number">{{ total_fee_records }}</p>
-    </div>
-
-</div>
-
-<!-- 🔷 QUICK ACTIONS -->
-<h2 style="margin-top:30px;">Quick Actions</h2>
-
-<div class="action-grid">
-
-    <a href="{{ url_for('add_student') }}" class="action-card">
-        ➕ Add Student
-    </a>
-
-    <a href="{{ url_for('students') }}" class="action-card">
-        👩‍🎓 View Students
-    </a>
-
-    <a href="{{ url_for('classes') }}" class="action-card">
-        🏫 Classes
-    </a>
-
-    <a href="{{ url_for('fees') }}" class="action-card">
-        💰 Fees
-    </a>
-
-    <a href="{{ url_for('teacher_registration') }}" class="action-card">
-        👨‍🏫 Add Teacher
-    </a>
-
-    <a href="{{ url_for('users') }}" class="action-card">
-        👥 Users
-    </a>
-
 </div>
 
 <style>
-/* GRID */
+.dashboard-page {
+    padding: 10px 0 30px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 30px;
+    color: #2563eb;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #2563eb;
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1e40af;
+}
+
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
 }
 
-/* CARDS */
 .card {
-    padding: 20px;
-    border-radius: 10px;
-    color: white;
-    text-align: center;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.card.blue {
-    background: linear-gradient(135deg, #1565c0, #1e88e5);
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #1e40af;
+    font-size: 22px;
 }
 
-.card h3 {
-    margin: 0;
-    font-size: 16px;
-}
-
-.number {
-    font-size: 28px;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-/* ACTIONS */
-.action-grid {
+.quick-links {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    margin-top: 15px;
 }
 
-.action-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
+.quick-link {
+    display: block;
     text-decoration: none;
-    color: #1565c0;
-    font-weight: bold;
-    border: 1px solid #ddd;
-    transition: 0.2s;
-}
-
-.action-card:hover {
-    background: #1565c0;
+    background: #2563eb;
     color: white;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-align: center;
+    transition: 0.2s ease;
 }
 
-</style>
+.quick-link:hover {
+    background: #1e40af;
+}
 
+.notes-box p {
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 12px;
+    color: #374151;
+}
+
+@media (max-width: 1000px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-links {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}

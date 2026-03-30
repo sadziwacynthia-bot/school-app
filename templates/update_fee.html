@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Update Fee Payment</h1>
+    <p>Add a new payment for this student.</p>
+</div>
+
+<div class="card">
+    <div class="student-info">
+        <p><strong>Student:</strong> {{ fee.first_name }} {{ fee.last_name }}</p>
+        <p><strong>Student Number:</strong> {{ fee.student_number }}</p>
+        <p><strong>Class:</strong> {{ fee.class_name }}</p>
+        <p><strong>Term:</strong> {{ fee.term_name or "Not set" }}</p>
+        <p><strong>Total Fee:</strong> ${{ fee.amount }}</p>
+        <p><strong>Already Paid:</strong> ${{ fee.paid_amount }}</p>
+        <p><strong>Balance:</strong> ${{ fee.balance }}</p>
+        <p><strong>Status:</strong> {{ fee.status }}</p>
+    </div>
+
+    <form method="POST" class="payment-form">
+        <label>Additional Payment</label>
+        <input type="number" step="0.01" min="0" name="additional_payment" required>
+        <label>Payment Date</label>
+        <input type="date" name="payment_date" required>
+
+        <label>Receipt Number</label>
+        <input type="text" name="receipt_number" required>
+
+        <label>Additional Payment</label>
+        <input type="number" step="0.01" min="0" name="additional_payment" required>
+
+        <button type="submit">Save Payment</button>
+    </form>
+</div>
+    <div class="payment-history">
+        <h2>Payment History</h2>
+
+        {% if payment_history %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Payment Date</th>
+                    <th>Receipt Number</th>
+                    <th>Amount Paid</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payment_history %}
+                <tr>
+                    <td>{{ payment.payment_date }}</td>
+                    <td>{{ payment.receipt_number }}</td>
+                    <td>${{ payment.amount_paid }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No payment history yet.</p>
+        {% endif %}
+    </div>
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 30px;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    max-width: 700px;
+}
+
+.student-info p {
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.payment-form {
+    margin-top: 20px;
+}
+
+.payment-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.payment-form input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 15px;
+}
+
+.payment-form button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.payment-form button:hover {
+    background: #1e40af;
+}
+.payment-history {
+    margin-top: 30px;
+}
+
+.payment-history h2 {
+    color: #1e40af;
+    margin-bottom: 15px;
+}
+
+.payment-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.payment-history th,
+.payment-history td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.payment-history th {
+    background: #2563eb;
+    color: white;
+}
+</style>
+{% endblock %}
