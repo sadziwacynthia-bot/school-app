@@ -552,9 +552,49 @@ def save_student():
 @roles_required("admin", "director")
 def student_profile(id):
     conn = get_db()
-    student = conn.execute("SELECT * FROM students WHERE id = ?", (id,)).fetchone()
+    cursor = conn.cursor()
+
+    student = cursor.execute(
+        "SELECT * FROM students WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    guardians = cursor.execute(
+        "SELECT * FROM guardians WHERE student_id = ?",
+        (id,)
+    ).fetchall()
+
+    fees = cursor.execute(
+        "SELECT * FROM fees WHERE student_id = ? ORDER BY term_name",
+        (id,)
+    ).fetchall()
+
+    try:
+        results = cursor.execute(
+            "SELECT * FROM results WHERE student_id = ? ORDER BY term, subject",
+            (id,)
+        ).fetchall()
+    except Exception:
+        results = []
+
+    try:
+        attendance_records = cursor.execute(
+            "SELECT * FROM attendance WHERE student_id = ? ORDER BY date DESC",
+            (id,)
+        ).fetchall()
+    except Exception:
+        attendance_records = []
+
     conn.close()
-    return render_template("student_profile.html", student=student)
+
+    return render_template(
+        "student_profile.html",
+        student=student,
+        guardians=guardians,
+        fees=fees,
+        results=results,
+        attendance_records=attendance_records
+    )
 
 
 @app.route("/edit_student/<int:id>")

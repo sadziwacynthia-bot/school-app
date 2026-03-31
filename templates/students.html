@@ -31,7 +31,7 @@
                     <td>{{ student.boarding_status or '-' }}</td>
                     <td>{{ student.guardian1_name or '-' }}</td>
                     <td>
-                        <a href="{{ url_for('student_profile', id=student.id) }}" class="btn">View</a>
+                        <a href="{{ url_for('student_profile', id=student.id) }}">View Profile</a>
                         <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-secondary">Edit</a>
                     </td>
                     <td>
