@@ -371,10 +371,40 @@ def dashboard():
 @roles_required("admin", "director")
 def students():
     conn = get_db()
-    all_students = conn.execute("SELECT * FROM students ORDER BY first_name, last_name").fetchall()
-    conn.close()
-    return render_template("students.html", students=all_students)
+    cursor = conn.cursor()
 
+    search = request.args.get("search", "").strip()
+
+    query = "SELECT * FROM students"
+    params = []
+
+    if search:
+        query += """
+            WHERE first_name LIKE ?
+            OR last_name LIKE ?
+            OR student_number LIKE ?
+            OR class_name LIKE ?
+        """
+        like_search = f"%{search}%"
+        params = [like_search, like_search, like_search, like_search]
+
+    query += " ORDER BY class_name, first_name, last_name"
+
+    all_students = cursor.execute(query, params).fetchall()
+    conn.close()
+
+    grouped_students = {}
+    for student in all_students:
+        class_name = student["class_name"] or "No Class Assigned"
+        if class_name not in grouped_students:
+            grouped_students[class_name] = []
+        grouped_students[class_name].append(student)
+
+    return render_template(
+        "students.html",
+        grouped_students=grouped_students,
+        search=search
+    )
 
 @app.route("/add_student")
 @login_required
