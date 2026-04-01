@@ -5,7 +5,9 @@
     <h1>Students</h1>
     <p>View students grouped by class.</p>
 </div>
-
+<div class="page-actions">
+    <a href="{{ url_for('add_student') }}" class="action-btn">Add Student</a>
+</div>
 <div class="search-card">
     <form method="GET" action="{{ url_for('students') }}" class="search-form">
         <input
@@ -65,6 +67,23 @@
 {% endif %}
 
 <style>
+    .page-actions {
+    margin-bottom: 20px;
+}
+
+.action-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    background: #1e40af;
+}
 .page-header {
     margin-bottom: 24px;
 }
