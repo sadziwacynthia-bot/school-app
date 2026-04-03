@@ -1,40 +1,292 @@
 {% extends "base.html" %}
-{% block title %}Edit Student{% endblock %}
-{% block content %}
-<div class="card">
-    <h1 class="page-title">Edit Student</h1>
 
-    <form method="GET">
-        <div class="grid-2">
+{% block content %}
+<div class="page-header">
+    <h1>Edit Student</h1>
+    <p>Update full student, guardian, and school details.</p>
+</div>
+
+<form method="POST" action="{{ url_for('update_student', id=student.id) }}" class="student-form">
+    <div class="form-section">
+        <h2>Student Information</h2>
+        <div class="form-grid">
             <div class="form-group">
                 <label>First Name</label>
-                <input type="text" class="form-control" value="{{ student.first_name }}" readonly>
+                <input type="text" name="first_name" value="{{ student.first_name or '' }}" required>
             </div>
 
             <div class="form-group">
                 <label>Last Name</label>
-                <input type="text" class="form-control" value="{{ student.last_name }}" readonly>
+                <input type="text" name="last_name" value="{{ student.last_name or '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" name="birthday" value="{{ student.birthday or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <select name="gender">
+                    <option value="">Select gender</option>
+                    <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label>Class</label>
-                <select class="form-control">
+                <select name="class_name" required>
+                    <option value="">Select class</option>
                     {% for class_name in class_options %}
-                    <option value="{{ class_name }}" {% if student.class_name == class_name %}selected{% endif %}>{{ class_name }}</option>
+                        <option value="{{ class_name }}" {% if student.class_name == class_name %}selected{% endif %}>
+                            {{ class_name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Student Type</label>
-                <select class="form-control">
-                    <option {% if student.boarding_status == 'Day' %}selected{% endif %}>Day</option>
-                    <option {% if student.boarding_status == 'Boarder' %}selected{% endif %}>Boarder</option>
+                <label>Boarding Status</label>
+                <select name="boarding_status">
+                    <option value="">Select status</option>
+                    <option value="Day" {% if student.boarding_status == 'Day' %}selected{% endif %}>Day</option>
+                    <option value="Boarder" {% if student.boarding_status == 'Boarder' %}selected{% endif %}>Boarder</option>
                 </select>
             </div>
-        </div>
 
-        <a href="{{ url_for('students') }}" class="btn">Back to Students</a>
-    </form>
+            <div class="form-group">
+                <label>Enrollment Date</label>
+                <input type="date" name="enrollment_date" value="{{ student.enrollment_date or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Leaving Year</label>
+                <input type="text" name="leaving_year" value="{{ student.leaving_year or '' }}">
+            </div>
+        </div>
+        <div class="form-group">
+    <label>Student Status</label>
+    <select name="current_status">
+        <option value="Active" {% if student.current_status == 'Active' %}selected{% endif %}>Active</option>
+        <option value="Graduated" {% if student.current_status == 'Graduated' %}selected{% endif %}>Graduated</option>
+        <option value="Transferred" {% if student.current_status == 'Transferred' %}selected{% endif %}>Transferred</option>
+        <option value="Withdrawn" {% if student.current_status == 'Withdrawn' %}selected{% endif %}>Withdrawn</option>
+    </select>
 </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Contact & Health Information</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Home Address</label>
+                <input type="text" name="home_address" value="{{ student.home_address or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Mailing Address</label>
+                <input type="text" name="mailing_address" value="{{ student.mailing_address or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Student Phone</label>
+                <input type="text" name="student_phone" value="{{ student.student_phone or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Emergency Contact</label>
+                <input type="text" name="emergency_contact" value="{{ student.emergency_contact or '' }}">
+            </div>
+
+            <div class="form-group full-width">
+                <label>Medical Information</label>
+                <textarea name="medical_info" rows="3">{{ student.medical_info or '' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Guardian 1 Information</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="guardian1_name" value="{{ student.guardian1_name or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Relationship</label>
+                <input type="text" name="guardian1_relationship" value="{{ student.guardian1_relationship or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="guardian1_phone" value="{{ student.guardian1_phone or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>WhatsApp Number</label>
+                <input type="text" name="guardian1_whatsapp" value="{{ student.guardian1_whatsapp or '' }}">
+            </div>
+
+            <div class="form-group full-width">
+                <label>Email Address</label>
+                <input type="email" name="guardian1_email" value="{{ student.guardian1_email or '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Guardian 2 Information</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="guardian2_name" value="{{ student.guardian2_name or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Relationship</label>
+                <input type="text" name="guardian2_relationship" value="{{ student.guardian2_relationship or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="guardian2_phone" value="{{ student.guardian2_phone or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>WhatsApp Number</label>
+                <input type="text" name="guardian2_whatsapp" value="{{ student.guardian2_whatsapp or '' }}">
+            </div>
+
+            <div class="form-group full-width">
+                <label>Email Address</label>
+                <input type="email" name="guardian2_email" value="{{ student.guardian2_email or '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Changes</button>
+        <a href="{{ url_for('student_profile', id=student.id) }}" class="btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 30px;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.student-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.form-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.form-section h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #1e40af;
+    font-size: 22px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}
