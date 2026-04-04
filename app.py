@@ -308,6 +308,41 @@ def roles_required(*allowed_roles):
 # =========================================================
 # AUTH
 # =========================================================
+def is_postgres():
+    return os.environ.get("DATABASE_URL") is not None
+
+
+def run_query(query_sqlite, query_postgres, params=(), fetchone=False, fetchall=False, commit=False):
+    db = get_db()
+
+    if is_postgres():
+        cur = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(query_postgres, params)
+
+        result = None
+        if fetchone:
+            result = cur.fetchone()
+        elif fetchall:
+            result = cur.fetchall()
+
+        if commit:
+            db.commit()
+
+        cur.close()
+        return result
+    else:
+        cur = db.execute(query_sqlite, params)
+
+        result = None
+        if fetchone:
+            result = cur.fetchone()
+        elif fetchall:
+            result = cur.fetchall()
+
+        if commit:
+            db.commit()
+
+        return result
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -320,7 +355,7 @@ def login():
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT * FROM users WHERE username = ?",
+            "SELECT * FROM users WHERE username = %s",
             (request.form["username"],)
         )
         user = cursor.fetchone()
@@ -392,10 +427,10 @@ def students():
 
     if search:
         query += """
-            WHERE first_name LIKE ?
-            OR last_name LIKE ?
-            OR student_number LIKE ?
-            OR class_name LIKE ?
+            WHERE first_name LIKE %s
+            OR last_name LIKE %s
+            OR student_number LIKE %s
+            OR class_name LIKE %s
         """
         like_search = f"%{search}%"
         params = [like_search, like_search, like_search, like_search]
@@ -483,7 +518,7 @@ def save_student():
                 guardian2_name, guardian2_relationship, guardian2_phone,
                 guardian2_whatsapp, guardian2_email, current_status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             student_number, first_name, last_name, birthday, gender,
             enrollment_date, leaving_year, class_name, boarding_status,
@@ -498,7 +533,7 @@ def save_student():
 
         cursor.execute("""
             INSERT INTO users (full_name, username, password, role)
-            VALUES (?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
         """, (
             guardian1_name,
             parent_username,
@@ -511,7 +546,7 @@ def save_student():
             INSERT INTO guardians (
                 student_id, parent_user_id, full_name, relationship, phone, whatsapp, email
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             student_id,
             parent_user_id,
@@ -527,7 +562,7 @@ def save_student():
                 INSERT INTO guardians (
                     student_id, parent_user_id, full_name, relationship, phone, whatsapp, email
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
                 student_id,
                 parent_user_id,
@@ -561,7 +596,7 @@ def save_student():
                     INSERT INTO fees (
                         student_id, term_name, amount, paid_amount, balance, status, due_date
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """, (
                     student_id,
                     term_name,
@@ -598,23 +633,23 @@ def student_profile(id):
     cursor = conn.cursor()
 
     student = cursor.execute(
-        "SELECT * FROM students WHERE id = ?",
+        "SELECT * FROM students WHERE id = %s",
         (id,)
     ).fetchone()
 
     guardians = cursor.execute(
-        "SELECT * FROM guardians WHERE student_id = ?",
+        "SELECT * FROM guardians WHERE student_id = %s",
         (id,)
     ).fetchall()
 
     fees = cursor.execute(
-        "SELECT * FROM fees WHERE student_id = ? ORDER BY term_name",
+        "SELECT * FROM fees WHERE student_id = %s ORDER BY term_name",
         (id,)
     ).fetchall()
 
     try:
         results = cursor.execute(
-            "SELECT * FROM results WHERE student_id = ? ORDER BY term, subject",
+            "SELECT * FROM results WHERE student_id = %s ORDER BY term, subject",
             (id,)
         ).fetchall()
     except Exception:
@@ -622,7 +657,7 @@ def student_profile(id):
 
     try:
         attendance_records = cursor.execute(
-            "SELECT * FROM attendance WHERE student_id = ? ORDER BY date DESC",
+            "SELECT * FROM attendance WHERE student_id = %s ORDER BY date DESC",
             (id,)
         ).fetchall()
     except Exception:
@@ -645,7 +680,7 @@ def student_profile(id):
 @roles_required("admin", "director")
 def edit_student(id):
     conn = get_db()
-    student = conn.execute("SELECT * FROM students WHERE id = ?", (id,)).fetchone()
+    student = conn.execute("SELECT * FROM students WHERE id = %s", (id,)).fetchone()
     conn.close()
     return render_template("edit_student.html", student=student, class_options=CLASS_OPTIONS)
 @app.route("/update_student/<int:id>", methods=["POST"])
@@ -659,30 +694,30 @@ def update_student(id):
         cursor.execute("""
             UPDATE students
             SET
-                first_name = ?,
-                last_name = ?,
-                birthday = ?,
-                gender = ?,
-                enrollment_date = ?,
-                leaving_year = ?,
-                class_name = ?,
-                boarding_status = ?,
-                home_address = ?,
-                mailing_address = ?,
-                student_phone = ?,
-                medical_info = ?,
-                emergency_contact = ?,
-                guardian1_name = ?,
-                guardian1_relationship = ?,
-                guardian1_phone = ?,
-                guardian1_whatsapp = ?,
-                guardian1_email = ?,
-                guardian2_name = ?,
-                guardian2_relationship = ?,
-                guardian2_phone = ?,
-                guardian2_whatsapp = ?,
-                guardian2_email = ?
-            WHERE id = ?
+                first_name = %s,
+                last_name = %s,
+                birthday = %s,
+                gender = %s,
+                enrollment_date = %s,
+                leaving_year = %s,
+                class_name = %s,
+                boarding_status = %s,
+                home_address = %s,
+                mailing_address = %s,
+                student_phone = %s,
+                medical_info = %s,
+                emergency_contact = %s,
+                guardian1_name = %s,
+                guardian1_relationship = %s,
+                guardian1_phone = %s,
+                guardian1_whatsapp = %s,
+                guardian1_email = %s,
+                guardian2_name = %s,
+                guardian2_relationship = %s,
+                guardian2_phone = %s,
+                guardian2_whatsapp = %s,
+                guardian2_email = %s
+            WHERE id = %s
         """, (
             request.form.get("first_name"),
             request.form.get("last_name"),
@@ -738,7 +773,7 @@ def classes():
 def class_students(class_name):
     conn = get_db()
     class_list = conn.execute(
-        "SELECT * FROM students WHERE class_name = ? ORDER BY first_name, last_name",
+        "SELECT * FROM students WHERE class_name = %s ORDER BY first_name, last_name",
         (class_name,)
     ).fetchall()
     conn.close()
@@ -772,14 +807,14 @@ def teacher_registration():
 
         cursor.execute("""
             INSERT INTO users (full_name, username, password, role)
-            VALUES (?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s)
         """, (name, username, password, "teacher"))
 
         user_id = cursor.lastrowid
 
         cursor.execute("""
             INSERT INTO teachers (user_id, teacher_id, full_name, phone, email)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         """, (
             user_id,
             generate_teacher_id(),
@@ -806,7 +841,7 @@ def teacher_dashboard():
 
     teacher = cursor.execute("""
         SELECT * FROM teachers
-        WHERE user_id = ?
+        WHERE user_id = %s
         LIMIT 1
     """, (session["user_id"],)).fetchone()
 
@@ -815,7 +850,7 @@ def teacher_dashboard():
         assignments = cursor.execute("""
             SELECT *
             FROM teacher_assignments
-            WHERE teacher_id = ?
+            WHERE teacher_id = %s
             ORDER BY class_name, subject
         """, (teacher["id"],)).fetchall()
 
@@ -855,9 +890,9 @@ def fees():
     if search:
         query += """
             WHERE
-                s.first_name LIKE ?
-                OR s.last_name LIKE ?
-                OR s.student_number LIKE ?
+                s.first_name LIKE %s
+                OR s.last_name LIKE %s
+                OR s.student_number LIKE %s
         """
         like_search = f"%{search}%"
         params.extend([like_search, like_search, like_search])
@@ -886,7 +921,7 @@ def update_fee(fee_id):
             s.class_name
         FROM fees f
         JOIN students s ON f.student_id = s.id
-        WHERE f.id = ?
+        WHERE f.id = %s
     """, (fee_id,))
     fee = cursor.fetchone()
 
@@ -917,8 +952,8 @@ def update_fee(fee_id):
 
         cursor.execute("""
             UPDATE fees
-            SET paid_amount = ?, balance = ?, status = ?
-            WHERE id = ?
+            SET paid_amount = %s, balance = %s, status = %s
+            WHERE id = %s
         """, (new_paid_amount, new_balance, status, fee_id))
 
         conn.commit()
@@ -985,7 +1020,7 @@ def assign_teacher():
 
         cursor.execute("""
             INSERT INTO teacher_assignments (teacher_id, class_name, subject)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         """, (teacher_id, class_name, subject))
 
         conn.commit()
@@ -1034,7 +1069,7 @@ def attendance():
     if selected_class:
         cursor.execute("""
             SELECT * FROM students
-            WHERE class_name = ?
+            WHERE class_name = %s
             ORDER BY first_name, last_name
         """, (selected_class,))
         students = cursor.fetchall()
@@ -1065,7 +1100,7 @@ def save_attendance():
 
             cursor.execute("""
                 INSERT INTO attendance (student_id, class_name, date, status)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             """, (student_id, class_name, date, status))
 
         conn.commit()
@@ -1148,7 +1183,7 @@ def save_result():
 
     cursor.execute("""
         INSERT INTO results (student_id, class_name, subject, term, marks, grade)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (student_id, class_name, subject, term, marks, grade))
 
     conn.commit()
@@ -1212,7 +1247,7 @@ def add_assignment():
 
         cursor.execute("""
             INSERT INTO assignments (class_name, subject, title, description, due_date, created_by)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (class_name, subject, title, description, due_date, created_by))
 
         conn.commit()
@@ -1250,7 +1285,7 @@ def parent_setup():
             FROM users u
             JOIN guardians g ON u.id = g.parent_user_id
             JOIN students s ON s.id = g.student_id
-            WHERE s.student_number = ? AND g.phone = ?
+            WHERE s.student_number = %s AND g.phone = %s
             LIMIT 1
         """, (student_number, phone))
 
@@ -1265,8 +1300,8 @@ def parent_setup():
 
         cursor.execute("""
             UPDATE users
-            SET password = ?
-            WHERE id = ?
+            SET password = %s
+            WHERE id = %s
         """, (hashed_password, user["id"]))
 
         conn.commit()
@@ -1289,7 +1324,7 @@ def parent_dashboard():
         SELECT s.*
         FROM students s
         JOIN guardians g ON s.id = g.student_id
-        WHERE g.parent_user_id = ?
+        WHERE g.parent_user_id = %s
         LIMIT 1
     """, (session["user_id"],))
 
@@ -1308,7 +1343,7 @@ def parent_dashboard():
                 COALESCE(SUM(paid_amount), 0) AS total_paid,
                 COALESCE(SUM(balance), 0) AS total_balance
             FROM fees
-            WHERE student_id = ?
+            WHERE student_id = %s
         """, (student["id"],))
         fee_summary = cursor.fetchone()
 
@@ -1332,7 +1367,7 @@ def parent_fees():
         FROM fees f
         JOIN guardians g ON f.student_id = g.student_id
         JOIN students s ON s.id = f.student_id
-        WHERE g.parent_user_id = ?
+        WHERE g.parent_user_id = %s
         ORDER BY f.term_name
     """, (session["user_id"],))
 
@@ -1355,7 +1390,7 @@ def parent_results():
             FROM results r
             JOIN guardians g ON r.student_id = g.student_id
             JOIN students s ON s.id = r.student_id
-            WHERE g.parent_user_id = ?
+            WHERE g.parent_user_id = %s
             ORDER BY r.term, r.subject
         """, (session["user_id"],))
         result_records = cursor.fetchall()
@@ -1380,7 +1415,7 @@ def parent_attendance():
             FROM attendance a
             JOIN guardians g ON a.student_id = g.student_id
             JOIN students s ON s.id = a.student_id
-            WHERE g.parent_user_id = ?
+            WHERE g.parent_user_id = %s
             ORDER BY a.date DESC
         """, (session["user_id"],))
         attendance_records = cursor.fetchall()
@@ -1403,7 +1438,7 @@ def parent_assignments():
         SELECT s.class_name, s.first_name, s.last_name
         FROM students s
         JOIN guardians g ON s.id = g.student_id
-        WHERE g.parent_user_id = ?
+        WHERE g.parent_user_id = %s
         LIMIT 1
     """, (session["user_id"],))
 
@@ -1415,7 +1450,7 @@ def parent_assignments():
             cursor.execute("""
                 SELECT *
                 FROM assignments
-                WHERE class_name = ?
+                WHERE class_name = %s
                 ORDER BY due_date
             """, (student["class_name"],))
             assignments_list = cursor.fetchall()
@@ -1437,9 +1472,9 @@ def delete_student(id):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("DELETE FROM fees WHERE student_id = ?", (id,))
-        cursor.execute("DELETE FROM guardians WHERE student_id = ?", (id,))
-        cursor.execute("DELETE FROM students WHERE id = ?", (id,))
+        cursor.execute("DELETE FROM fees WHERE student_id = %s", (id,))
+        cursor.execute("DELETE FROM guardians WHERE student_id = %s", (id,))
+        cursor.execute("DELETE FROM students WHERE id = %s", (id,))
 
         conn.commit()
         flash("Student deleted successfully.", "success")
@@ -1458,12 +1493,12 @@ def delete_teacher(id):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT user_id FROM teachers WHERE id = ?", (id,))
+        cursor.execute("SELECT user_id FROM teachers WHERE id = %s", (id,))
         teacher = cursor.fetchone()
 
         if teacher:
-            cursor.execute("DELETE FROM teachers WHERE id = ?", (id,))
-            cursor.execute("DELETE FROM users WHERE id = ?", (teacher["user_id"],))
+            cursor.execute("DELETE FROM teachers WHERE id = %s", (id,))
+            cursor.execute("DELETE FROM users WHERE id = %s", (teacher["user_id"],))
             conn.commit()
             flash("Teacher deleted successfully.", "success")
         else:
@@ -1483,7 +1518,7 @@ def delete_user(id):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("DELETE FROM users WHERE id = ?", (id,))
+        cursor.execute("DELETE FROM users WHERE id = %s", (id,))
         conn.commit()
         flash("User deleted successfully.", "success")
     except Exception as e:
