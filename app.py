@@ -26,6 +26,22 @@ CLASS_OPTIONS = [
 # =========================================================
 # DATABASE
 # =========================================================
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            full_name VARCHAR(255) NOT NULL,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
 
 def get_db():
     database_url = os.environ.get("DATABASE_URL")
@@ -348,11 +364,13 @@ def index():
     return render_template("index.html")
 
 
+from psycopg2.extras import RealDictCursor
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         conn = get_db()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
             "SELECT * FROM users WHERE username = %s",
@@ -987,8 +1005,29 @@ def add_user():
 @roles_required("admin", "director")
 def generate_fees():
     return render_template("generate_fees.html")
+def create_admin_user():
+    conn = get_db()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
+    cursor.execute("SELECT * FROM users WHERE username = %s", ("admin",))
+    existing_user = cursor.fetchone()
 
+    if not existing_user:
+        cursor.execute("""
+            INSERT INTO users (full_name, username, password, role)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            "Administrator",
+            "admin",
+            generate_password_hash("admin123"),
+            "admin"
+        ))
+        conn.commit()
+
+    conn.close()
+with app.app_context():
+    init_db()
+    create_admin_user()
 # =========================================================
 # SIMPLE / PLACEHOLDER PAGES
 # =========================================================
@@ -1531,6 +1570,9 @@ def delete_user(id):
 # =========================================================
 # RUN
 # =========================================================
+with app.app_context():
+    init_db()
+
 if __name__ == "__main__":
     ensure_tables()
     app.run(debug=True)
