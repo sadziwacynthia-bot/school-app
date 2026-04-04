@@ -5,6 +5,7 @@ import string
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import sqlite3
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -448,7 +449,7 @@ def save_student():
         student_phone = request.form.get("student_phone")
         medical_info = request.form.get("medical_info")
         emergency_contact = request.form.get("emergency_contact")
-        current_status = request.form.get("current_status") or "Active"
+        current_status = request.form.get("current_status")
 
         # GUARDIAN 1
         guardian1_name = request.form.get("guardian1_name")
@@ -482,7 +483,7 @@ def save_student():
                 guardian2_name, guardian2_relationship, guardian2_phone,
                 guardian2_whatsapp, guardian2_email, current_status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             student_number, first_name, last_name, birthday, gender,
             enrollment_date, leaving_year, class_name, boarding_status,
@@ -490,7 +491,7 @@ def save_student():
             emergency_contact, guardian1_name, guardian1_relationship,
             guardian1_phone, guardian1_whatsapp, guardian1_email,
             guardian2_name, guardian2_relationship, guardian2_phone,
-            guardian2_whatsapp, guardian2_email, current_status
+            guardian2_whatsapp, guardian2_email
         ))
 
         student_id = cursor.lastrowid
@@ -666,7 +667,6 @@ def update_student(id):
                 leaving_year = ?,
                 class_name = ?,
                 boarding_status = ?,
-                current_status = ?,
                 home_address = ?,
                 mailing_address = ?,
                 student_phone = ?,
@@ -692,7 +692,6 @@ def update_student(id):
             request.form.get("leaving_year"),
             request.form.get("class_name"),
             request.form.get("boarding_status"),
-            request.form.get("current_status") or "Active",
             request.form.get("home_address"),
             request.form.get("mailing_address"),
             request.form.get("student_phone"),
@@ -722,27 +721,7 @@ def update_student(id):
 
     finally:
         conn.close()
-@app.route("/delete_student/<int:id>", methods=["POST"])
-@login_required
-@roles_required("admin", "director")
-def delete_student(id):
-    conn = get_db()
-    cursor = conn.cursor()
 
-    try:
-        cursor.execute("DELETE FROM fees WHERE student_id = ?", (id,))
-        cursor.execute("DELETE FROM guardians WHERE student_id = ?", (id,))
-        cursor.execute("DELETE FROM students WHERE id = ?", (id,))
-
-        conn.commit()
-        flash("Student deleted successfully.", "success")
-    except Exception as e:
-        conn.rollback()
-        flash(f"Error deleting student: {str(e)}", "danger")
-    finally:
-        conn.close()
-
-    return redirect(url_for("students"))
 # =========================================================
 # CLASSES
 # =========================================================
@@ -1450,6 +1429,27 @@ def parent_assignments():
         assignments=assignments_list,
         student=student
     )
+@app.route("/delete_student/<int:id>", methods=["POST"])
+@login_required
+@roles_required("admin", "director")
+def delete_student(id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM fees WHERE student_id = ?", (id,))
+        cursor.execute("DELETE FROM guardians WHERE student_id = ?", (id,))
+        cursor.execute("DELETE FROM students WHERE id = ?", (id,))
+
+        conn.commit()
+        flash("Student deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting student: {str(e)}", "danger")
+    finally:
+        conn.close()
+
+    return redirect(url_for("students"))
 @app.route("/delete_teacher/<int:id>", methods=["POST"])
 @login_required
 @roles_required("admin", "director")
