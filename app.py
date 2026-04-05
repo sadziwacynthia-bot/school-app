@@ -358,7 +358,171 @@ def init_db():
 
     conn.commit()
     conn.close()
+def run_migrations():
+    conn = get_db()
+    cursor = conn.cursor()
 
+    statements = [
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS boarding_status VARCHAR(30)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS home_address TEXT",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS mailing_address TEXT",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS student_phone VARCHAR(50)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS medical_info TEXT",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS emergency_contact VARCHAR(100)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian1_name VARCHAR(255)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian1_relationship VARCHAR(100)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian1_phone VARCHAR(50)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian1_whatsapp VARCHAR(50)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian1_email VARCHAR(255)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian2_name VARCHAR(255)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian2_relationship VARCHAR(100)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian2_phone VARCHAR(50)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian2_whatsapp VARCHAR(50)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS guardian2_email VARCHAR(255)",
+        "ALTER TABLE students ADD COLUMN IF NOT EXISTS current_status VARCHAR(50)",
+
+        "ALTER TABLE fees ADD COLUMN IF NOT EXISTS term_name VARCHAR(50)",
+        "ALTER TABLE fees ADD COLUMN IF NOT EXISTS paid_amount NUMERIC(10,2) DEFAULT 0",
+        "ALTER TABLE fees ADD COLUMN IF NOT EXISTS balance NUMERIC(10,2)",
+        "ALTER TABLE fees ADD COLUMN IF NOT EXISTS status VARCHAR(50)",
+        "ALTER TABLE fees ADD COLUMN IF NOT EXISTS due_date VARCHAR(50)",
+
+        "ALTER TABLE results ADD COLUMN IF NOT EXISTS class_name VARCHAR(100)",
+        "ALTER TABLE results ADD COLUMN IF NOT EXISTS term VARCHAR(50)",
+        "ALTER TABLE results ADD COLUMN IF NOT EXISTS grade VARCHAR(10)",
+
+        "ALTER TABLE attendance ADD COLUMN IF NOT EXISTS class_name VARCHAR(100)",
+
+        """
+        CREATE TABLE IF NOT EXISTS guardians (
+            id SERIAL PRIMARY KEY,
+            student_id INTEGER,
+            parent_user_id INTEGER,
+            full_name VARCHAR(255),
+            relationship VARCHAR(100),
+            phone VARCHAR(50),
+            whatsapp VARCHAR(50),
+            email VARCHAR(255)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS teacher_assignments (
+            id SERIAL PRIMARY KEY,
+            teacher_id INTEGER,
+            class_name VARCHAR(100),
+            subject VARCHAR(100)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS assignments (
+            id SERIAL PRIMARY KEY,
+            class_name VARCHAR(100),
+            subject VARCHAR(100),
+            title VARCHAR(255),
+            description TEXT,
+            due_date VARCHAR(50),
+            created_by VARCHAR(255)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS fee_payments (
+            id SERIAL PRIMARY KEY,
+            fee_id INTEGER,
+            payment_date VARCHAR(50),
+            amount_paid NUMERIC(10,2),
+            receipt_number VARCHAR(100)
+        )
+        """
+    ]
+
+    try:
+        if is_postgres():
+            for stmt in statements:
+                cursor.execute(stmt)
+        else:
+            # SQLite fallback
+            sqlite_statements = [
+                "ALTER TABLE students ADD COLUMN boarding_status TEXT",
+                "ALTER TABLE students ADD COLUMN home_address TEXT",
+                "ALTER TABLE students ADD COLUMN mailing_address TEXT",
+                "ALTER TABLE students ADD COLUMN student_phone TEXT",
+                "ALTER TABLE students ADD COLUMN medical_info TEXT",
+                "ALTER TABLE students ADD COLUMN emergency_contact TEXT",
+                "ALTER TABLE students ADD COLUMN guardian1_name TEXT",
+                "ALTER TABLE students ADD COLUMN guardian1_relationship TEXT",
+                "ALTER TABLE students ADD COLUMN guardian1_phone TEXT",
+                "ALTER TABLE students ADD COLUMN guardian1_whatsapp TEXT",
+                "ALTER TABLE students ADD COLUMN guardian1_email TEXT",
+                "ALTER TABLE students ADD COLUMN guardian2_name TEXT",
+                "ALTER TABLE students ADD COLUMN guardian2_relationship TEXT",
+                "ALTER TABLE students ADD COLUMN guardian2_phone TEXT",
+                "ALTER TABLE students ADD COLUMN guardian2_whatsapp TEXT",
+                "ALTER TABLE students ADD COLUMN guardian2_email TEXT",
+                "ALTER TABLE students ADD COLUMN current_status TEXT",
+
+                "ALTER TABLE fees ADD COLUMN term_name TEXT",
+                "ALTER TABLE fees ADD COLUMN paid_amount REAL DEFAULT 0",
+                "ALTER TABLE fees ADD COLUMN balance REAL",
+                "ALTER TABLE fees ADD COLUMN status TEXT",
+                "ALTER TABLE fees ADD COLUMN due_date TEXT",
+
+                "ALTER TABLE results ADD COLUMN class_name TEXT",
+                "ALTER TABLE results ADD COLUMN term TEXT",
+                "ALTER TABLE results ADD COLUMN grade TEXT",
+
+                "ALTER TABLE attendance ADD COLUMN class_name TEXT",
+
+                """
+                CREATE TABLE IF NOT EXISTS guardians (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    student_id INTEGER,
+                    parent_user_id INTEGER,
+                    full_name TEXT,
+                    relationship TEXT,
+                    phone TEXT,
+                    whatsapp TEXT,
+                    email TEXT
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS teacher_assignments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    teacher_id INTEGER,
+                    class_name TEXT,
+                    subject TEXT
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS assignments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    class_name TEXT,
+                    subject TEXT,
+                    title TEXT,
+                    description TEXT,
+                    due_date TEXT,
+                    created_by TEXT
+                )
+                """,
+                """
+                CREATE TABLE IF NOT EXISTS fee_payments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fee_id INTEGER,
+                    payment_date TEXT,
+                    amount_paid REAL,
+                    receipt_number TEXT
+                )
+                """
+            ]
+
+            for stmt in sqlite_statements:
+                try:
+                    cursor.execute(stmt)
+                except Exception:
+                    pass
+
+        conn.commit()
+    finally:
+        conn.close()
 
 def create_admin_user():
     admin = fetch_one("SELECT * FROM users WHERE username = %s", ("admin",))
