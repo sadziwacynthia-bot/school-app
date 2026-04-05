@@ -1709,10 +1709,12 @@ def parent_assignments():
 
 
 with app.app_context():
-    init_db()
-    run_migrations()
-    create_admin_user()
-
+    try:
+        init_db()
+        create_admin_user()
+        print("Startup completed successfully.")
+    except Exception as e:
+        print(f"Startup error: {e}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
