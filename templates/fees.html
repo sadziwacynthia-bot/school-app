@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% block title %}Fees{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <h1>Fees Management</h1>
     <p>View all student fee records by class and term.</p>
 </div>
+
 <div class="search-card">
     <form method="GET" action="{{ url_for('fees') }}" class="search-form">
         <input 
@@ -17,7 +19,8 @@
         <a href="{{ url_for('fees') }}" class="clear-btn">Clear</a>
     </form>
 </div>
-<div class="card">
+
+<div class="card-box">
     {% if fee_records %}
     <div class="table-wrapper">
         <table>
@@ -55,15 +58,17 @@
                     </td>
                     <td>{{ fee.due_date or "-" }}</td>
                     <td>
-    <a href="{{ url_for('update_fee', fee_id=fee.id) }}" class="action-btn">Update Payment</a>
-</td>
+                        <a href="{{ url_for('update_fee', fee_id=fee.id) }}" class="action-btn">Update Payment</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-        <p>No fee records found yet.</p>
+        <div class="empty-state">
+            <p>No fee records found yet.</p>
+        </div>
     {% endif %}
 </div>
 
@@ -81,13 +86,65 @@
 .page-header p {
     margin-top: 8px;
     color: #6b7280;
+    font-size: 15px;
 }
 
-.card {
+.search-card,
+.card-box {
     background: white;
     border-radius: 16px;
-    padding: 24px;
+    padding: 20px 24px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 260px;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.search-form input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.search-form button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-form button:hover {
+    background: #1e40af;
+}
+
+.clear-btn {
+    display: inline-block;
+    background: #e5e7eb;
+    color: #111827;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.clear-btn:hover {
+    background: #d1d5db;
 }
 
 .table-wrapper {
@@ -138,6 +195,7 @@ tr:hover {
     background: #fee2e2;
     color: #991b1b;
 }
+
 .action-btn {
     display: inline-block;
     background: #2563eb;
@@ -152,56 +210,11 @@ tr:hover {
 .action-btn:hover {
     background: #1e40af;
 }
-.search-card {
-    background: white;
-    border-radius: 16px;
-    padding: 18px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
-}
 
-.search-form {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+.empty-state {
+    text-align: center;
+    padding: 20px 10px;
+    color: #6b7280;
 }
-
-.search-form input {
-    flex: 1;
-    min-width: 260px;
-    padding: 12px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    font-size: 15px;
-}
-
-.search-form button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.search-form button:hover {
-    background: #1e40af;
-}
-
-.clear-btn {
-    display: inline-block;
-    background: #e5e7eb;
-    color: #111827;
-    text-decoration: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.clear-btn:hover {
-    background: #d1d5db;
-}
-
 </style>
 {% endblock %}

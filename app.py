@@ -1021,6 +1021,9 @@ def update_fee(fee_id):
         except:
             additional_payment = 0
 
+        payment_date = request.form.get("payment_date")
+        receipt_number = request.form.get("receipt_number")
+
         new_paid_amount = float(fee["paid_amount"] or 0) + additional_payment
         total_amount = float(fee["amount"] or 0)
         new_balance = total_amount - new_paid_amount
@@ -1033,17 +1036,47 @@ def update_fee(fee_id):
         else:
             status = "Pending"
 
-        execute_commit("""
-            UPDATE fees
-            SET paid_amount = %s, balance = %s, status = %s
-            WHERE id = %s
-        """, (new_paid_amount, new_balance, status, fee_id))
+        conn = get_db()
+        cursor = conn.cursor()
 
-        flash("Fee payment updated successfully.", "success")
-        return redirect(url_for("fees"))
+        try:
+            cursor.execute(convert_query("""
+                UPDATE fees
+                SET paid_amount = %s, balance = %s, status = %s
+                WHERE id = %s
+            """), (new_paid_amount, new_balance, status, fee_id))
 
-    return render_template("update_fee.html", fee=fee)
+            if additional_payment > 0:
+                cursor.execute(convert_query("""
+                    INSERT INTO fee_payments (fee_id, payment_date, amount_paid, receipt_number)
+                    VALUES (%s, %s, %s, %s)
+                """), (
+                    fee_id,
+                    payment_date,
+                    additional_payment,
+                    receipt_number
+                ))
 
+            conn.commit()
+            flash("Fee payment updated successfully.", "success")
+
+        except Exception as e:
+            conn.rollback()
+            flash(f"Error updating fee payment: {str(e)}", "danger")
+
+        finally:
+            conn.close()
+
+        return redirect(url_for("update_fee", fee_id=fee_id))
+
+    payment_history = fetch_all("""
+        SELECT *
+        FROM fee_payments
+        WHERE fee_id = %s
+        ORDER BY payment_date DESC, id DESC
+    """, (fee_id,))
+
+    return render_template("update_fee.html", fee=fee, payment_history=payment_history)
 
 @app.route("/users")
 @login_required
@@ -1053,10 +1086,38 @@ def users():
     return render_template("users.html", users=user_list)
 
 
-@app.route("/add_user")
+@app.route("/add_user", methods=["GET", "POST"])
 @login_required
 @roles_required("admin", "director")
 def add_user():
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "").strip()
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+        role = request.form.get("role", "").strip()
+
+        if not full_name or not username or not password or not role:
+            flash("All fields are required.", "danger")
+            return redirect(url_for("add_user"))
+
+        existing_user = fetch_one("SELECT * FROM users WHERE username = %s", (username,))
+        if existing_user:
+            flash("Username already exists.", "danger")
+            return redirect(url_for("add_user"))
+
+        execute_commit("""
+            INSERT INTO users (full_name, username, password, role)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            full_name,
+            username,
+            generate_password_hash(password),
+            role
+        ))
+
+        flash("User added successfully.", "success")
+        return redirect(url_for("users"))
+
     return render_template("add_user.html")
 
 
@@ -1074,14 +1135,63 @@ def generate_fees():
 @login_required
 @roles_required("admin", "director", "teacher")
 def subjects():
-    return render_template("subjects.html")
+    subject_list = fetch_all("""
+        SELECT DISTINCT class_name, subject
+        FROM teacher_assignments
+        WHERE subject IS NOT NULL AND subject != ''
+        ORDER BY class_name, subject
+    """)
+
+    return render_template("subjects.html", subjects=subject_list)
 
 
-@app.route("/assign_subject")
+@app.route("/assign_subject", methods=["GET", "POST"])
 @login_required
 @roles_required("admin", "director")
 def assign_subject():
-    return render_template("assign_subject.html")
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        if request.method == "POST":
+            class_name = request.form.get("class_name")
+            subject = request.form.get("subject")
+
+            if not class_name or not subject:
+                flash("Class and subject are required.", "danger")
+                return redirect(url_for("assign_subject"))
+
+            cursor.execute(convert_query("""
+                INSERT INTO teacher_assignments (teacher_id, class_name, subject)
+                VALUES (%s, %s, %s)
+            """), (
+                0,
+                class_name,
+                subject
+            ))
+            conn.commit()
+            flash("Subject assigned successfully.", "success")
+            return redirect(url_for("assign_subject"))
+
+        assignments = fetch_all("""
+            SELECT class_name, subject
+            FROM teacher_assignments
+            ORDER BY class_name, subject
+        """)
+
+        return render_template(
+            "assign_subject.html",
+            class_options=CLASS_OPTIONS,
+            assignments=assignments
+        )
+
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error assigning subject: {str(e)}", "danger")
+        return redirect(url_for("assign_subject"))
+
+    finally:
+        conn.close()
 
 
 @app.route("/assign_teacher", methods=["GET", "POST"])

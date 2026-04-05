@@ -1,48 +1,180 @@
 {% extends "base.html" %}
+{% block title %}Enter Result{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Enter Student Result</h2>
+<div class="page-header">
+    <h1>Enter Student Result</h1>
+    <p>Select student and record marks for a subject.</p>
+</div>
 
-    <form method="POST" action="{{ url_for('save_result') }}">
-        <label>Student</label>
-        <select name="student_id" required>
-            <option value="">Select student</option>
-            {% for student in students %}
-                <option value="{{ student.id }}">
-                    {{ student.first_name }} {{ student.last_name }} - {{ student.class_name }}
-                </option>
-            {% endfor %}
-        </select>
+<div class="form-card">
+    <form method="POST" action="{{ url_for('save_result') }}" class="result-form">
 
-        <label>Class</label>
-        <select name="class_name" required>
-            <option value="">Select class</option>
-            {% for class_name in class_options %}
-                <option value="{{ class_name }}">{{ class_name }}</option>
-            {% endfor %}
-        </select>
+        <div class="form-grid">
 
-        <label>Subject</label>
-        <select name="subject" required>
-            <option value="">Select subject</option>
-            {% for subject in subjects %}
-                <option value="{{ subject }}">{{ subject }}</option>
-            {% endfor %}
-        </select>
+            <!-- STUDENT -->
+            <div class="form-group full-width">
+                <label for="student_id">Student</label>
+                <select name="student_id" id="student_id" required>
+                    <option value="">Select student</option>
+                    {% for student in students %}
+                        <option value="{{ student.id }}">
+                            {{ student.first_name }} {{ student.last_name }} ({{ student.class_name }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <label>Term</label>
-        <select name="term" required>
-            <option value="">Select term</option>
-            <option value="Term 1">Term 1</option>
-            <option value="Term 2">Term 2</option>
-            <option value="Term 3">Term 3</option>
-        </select>
+            <!-- CLASS -->
+            <div class="form-group">
+                <label for="class_name">Class</label>
+                <select name="class_name" id="class_name" required>
+                    <option value="">Select class</option>
+                    {% for class_name in class_options %}
+                        <option value="{{ class_name }}">{{ class_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <label>Marks</label>
-        <input type="number" name="marks" min="0" max="100" required>
+            <!-- SUBJECT -->
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <select name="subject" id="subject" required>
+                    <option value="">Select subject</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject }}">{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <button type="submit">Save Result</button>
+            <!-- TERM -->
+            <div class="form-group">
+                <label for="term">Term</label>
+                <select name="term" id="term" required>
+                    <option value="">Select term</option>
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                </select>
+            </div>
+
+            <!-- MARKS -->
+            <div class="form-group">
+                <label for="marks">Marks (%)</label>
+                <input type="number" name="marks" id="marks" min="0" max="100" required>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Result</button>
+            <a href="{{ url_for('results') }}" class="btn-secondary">View Results</a>
+        </div>
+
     </form>
 </div>
+
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 30px;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.result-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}

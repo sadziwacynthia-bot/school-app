@@ -1,38 +1,174 @@
 {% extends "base.html" %}
+{% block title %}Results{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Student Results</h2>
+<div class="page-header">
+    <h1>Student Results</h1>
+    <p>View all recorded student results by subject and term.</p>
+</div>
 
+<div class="page-actions">
+    <a href="{{ url_for('enter_result') }}" class="btn-primary">Enter Result</a>
+</div>
+
+<div class="card-box">
     {% if result_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Student Number</th>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Subject</th>
-                <th>Term</th>
-                <th>Marks</th>
-                <th>Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in result_records %}
-            <tr>
-                <td>{{ result.student_number }}</td>
-                <td>{{ result.first_name }} {{ result.last_name }}</td>
-                <td>{{ result.class_name }}</td>
-                <td>{{ result.subject }}</td>
-                <td>{{ result.term }}</td>
-                <td>{{ result.marks }}</td>
-                <td>{{ result.grade }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Number</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Term</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in result_records %}
+                <tr>
+                    <td>{{ result.student_number }}</td>
+                    <td>{{ result.first_name }} {{ result.last_name }}</td>
+                    <td>{{ result.class_name }}</td>
+                    <td>{{ result.subject }}</td>
+                    <td>{{ result.term }}</td>
+                    <td>{{ result.marks }}</td>
+                    <td>
+                        <span class="grade-badge grade-{{ result.grade|lower }}">
+                            {{ result.grade }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>No results found yet.</p>
+        <div class="empty-state">
+            <p>No results found yet.</p>
+            <a href="{{ url_for('enter_result') }}" class="btn-secondary">Add First Result</a>
+        </div>
     {% endif %}
 </div>
+
+<style>
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2563eb;
+    font-size: 30px;
+}
+
+.page-header p {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.page-actions {
+    margin-bottom: 20px;
+}
+
+.card-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background: #2563eb;
+    color: white;
+}
+
+.grade-badge {
+    display: inline-block;
+    min-width: 34px;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.grade-a {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.grade-b {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.grade-c {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.grade-d {
+    background: #fde68a;
+    color: #92400e;
+}
+
+.grade-f {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: #6b7280;
+}
+
+.btn-primary,
+.btn-secondary {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1e40af;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+</style>
 {% endblock %}
