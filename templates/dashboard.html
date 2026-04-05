@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="dashboard-page">
@@ -6,7 +7,7 @@
         <div>
             <h1>Admin Dashboard</h1>
             <p>
-                Welcome{% if session.full_name %}, {{ session.full_name }}{% endif %}.
+                Welcome{% if session.get('full_name') %}, {{ session.get('full_name') }}{% endif %}.
                 Here is a quick view of your school system.
             </p>
         </div>
@@ -35,7 +36,7 @@
     </div>
 
     <div class="dashboard-grid">
-        <div class="card">
+        <div class="card-box">
             <h2>Quick Actions</h2>
             <div class="quick-links">
                 <a href="{{ url_for('add_student') }}" class="quick-link">Add Student</a>
@@ -49,13 +50,13 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card-box">
             <h2>System Notes</h2>
             <div class="notes-box">
                 <p><strong>Students:</strong> Manage student records, profiles, and class placement.</p>
                 <p><strong>Teachers:</strong> Register teachers and track teaching staff.</p>
                 <p><strong>Fees:</strong> View and manage fee records in one place.</p>
-                <p><strong>Attendance & Results:</strong> Continue building your academic tracking features.</p>
+                <p><strong>Attendance &amp; Results:</strong> Continue building your academic tracking features.</p>
             </div>
         </div>
     </div>
@@ -115,14 +116,14 @@
     gap: 20px;
 }
 
-.card {
+.card-box {
     background: #ffffff;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.card h2 {
+.card-box h2 {
     margin-top: 0;
     margin-bottom: 18px;
     color: #1e40af;

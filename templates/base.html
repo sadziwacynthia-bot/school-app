@@ -2,177 +2,262 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}School System{% endblock %}</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background: #f4f8fc;
+            color: #1f2937;
         }
 
         /* NAVBAR */
         .navbar {
-            background: #1565c0;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
             color: white;
-            padding: 12px 20px;
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
         }
 
-        .navbar h2 {
+        .navbar-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .navbar-brand h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .navbar-brand small {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 12px;
         }
 
         .nav-links {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .nav-links a {
             color: white;
             text-decoration: none;
             font-size: 14px;
-            padding: 6px 10px;
-            border-radius: 5px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: 0.2s ease;
         }
 
         .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.18);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
         }
 
         /* PAGE */
         .container {
-            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 18px 40px;
         }
 
         /* BUTTONS */
         .btn {
-            background: #1565c0;
+            background: #2563eb;
             color: white;
             padding: 10px 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .btn:hover {
-            background: #0d47a1;
+            background: #1e40af;
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
         }
 
         /* FORMS */
         .form-control {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
 
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
 
         /* FLASH */
         .flash {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 5px solid transparent;
         }
 
-        .flash.success { background: #d4edda; }
-        .flash.danger { background: #f8d7da; }
-        .flash.warning { background: #fff3cd; }
+        .flash.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
 
+        .flash.danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left-color: #ef4444;
+        }
+
+        .flash.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left-color: #f59e0b;
+        }
+
+        .flash.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-left-color: #2563eb;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                align-items: flex-start;
+            }
+
+            .nav-links {
+                width: 100%;
+            }
+        }
     </style>
 </head>
-
 <body>
 
-<!-- 🔵 TOP NAVBAR -->
-<div class="navbar">
-    <h2>School System</h2>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h2>School System</h2>
+            {% if session.get('full_name') %}
+                <small>Welcome, {{ session.get('full_name') }}</small>
+            {% else %}
+                <small>School Management Portal</small>
+            {% endif %}
+        </div>
 
-    <div class="nav-links">
+        <div class="nav-links">
+            {% if session.get('role') in ['admin', 'director'] %}
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('students') }}">Students</a>
+                <a href="{{ url_for('classes') }}">Classes</a>
+                <a href="{{ url_for('fees') }}">Fees</a>
+                <a href="{{ url_for('teachers') }}">Teachers</a>
+                <a href="{{ url_for('users') }}">Users</a>
+                <a href="{{ url_for('attendance') }}">Attendance</a>
+                <a href="{{ url_for('enter_result') }}">Enter Results</a>
+                <a href="{{ url_for('results') }}">Results</a>
+                <a href="{{ url_for('subjects') }}">Subjects</a>
+                <a href="{{ url_for('assignments') }}">Assignments</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
 
-        {% if session.get('role') in ['admin', 'director'] %}
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('students') }}">Students</a>
-            <a href="{{ url_for('classes') }}">Classes</a>
-            <a href="{{ url_for('fees') }}">Fees</a>
-            <a href="{{ url_for('teachers') }}">Teachers</a>
-            <a href="{{ url_for('users') }}">Users</a>
-            <a href="{{ url_for('attendance') }}">Attendance</a>
-            <a href="{{ url_for('enter_result') }}">Enter Results</a>
-            <a href="{{ url_for('results') }}">Results</a>
-            <a href="{{ url_for('subjects') }}">Subjects</a>
-            <a href="{{ url_for('assignments') }}">Assignments</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            {% elif session.get('role') == 'teacher' %}
+                <a href="{{ url_for('teacher_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('classes') }}">Classes</a>
+                <a href="{{ url_for('attendance') }}">Attendance</a>
+                <a href="{{ url_for('enter_result') }}">Enter Results</a>
+                <a href="{{ url_for('results') }}">Results</a>
+                <a href="{{ url_for('subjects') }}">Subjects</a>
+                <a href="{{ url_for('assignments') }}">Assignments</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
 
-        {% elif session.get('role') == 'teacher' %}
-            <a href="{{ url_for('teacher_dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('classes') }}">Classes</a>
-            <a href="{{ url_for('attendance') }}">Attendance</a>
-            <a href="{{ url_for('enter_result') }}">Enter Results</a>
-            <a href="{{ url_for('results') }}">Results</a>
-            <a href="{{ url_for('subjects') }}">Subjects</a>
-            <a href="{{ url_for('assignments') }}">Assignments</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            {% elif session.get('role') == 'parent' %}
+                <a href="{{ url_for('parent_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('parent_fees') }}">Fees</a>
+                <a href="{{ url_for('parent_attendance') }}">Attendance</a>
+                <a href="{{ url_for('parent_results') }}">Results</a>
+                <a href="{{ url_for('parent_assignments') }}">Assignments</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
 
-       {% elif session.get('role') == 'parent' %}
-    <a href="{{ url_for('parent_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('parent_fees') }}">Fees</a>
-    <a href="{{ url_for('parent_attendance') }}">Attendance</a>
-    <a href="{{ url_for('parent_results') }}">Results</a>
-    <a href="{{ url_for('parent_assignments') }}">Assignments</a>
-    <a href="{{ url_for('logout') }}">Logout</a>
-
-        {% else %}
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('login') }}">Login</a>
-        {% endif %}
-
+            {% else %}
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('parent_setup') }}">Parent Setup</a>
+            {% endif %}
+        </div>
     </div>
-</div>
 
-<!-- CONTENT -->
-<div class="container">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-    <!-- FLASH MESSAGES -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash {{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    {% block content %}{% endblock %}
-
-</div>
+        {% block content %}{% endblock %}
+    </div>
 
 </body>
 </html>

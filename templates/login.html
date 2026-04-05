@@ -1,21 +1,64 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 40px auto;">
-    <h1 class="page-title">Login</h1>
-    <form method="POST">
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" required>
-        </div>
+<div class="login-wrapper">
+    <div class="login-card">
+        <h1 class="login-title">Login</h1>
+        <p class="login-subtitle">Enter your username and password to access the school system.</p>
 
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" required>
-        </div>
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
 
-        <button type="submit" class="btn" style="width: 100%;">Login</button>
-    </form>
- 
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn login-btn">Login</button>
+        </form>
+    </div>
 </div>
+
+<style>
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 16px;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 460px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 32px 28px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .login-title {
+        margin: 0 0 8px;
+        text-align: center;
+        color: #2563eb;
+        font-size: 30px;
+    }
+
+    .login-subtitle {
+        margin: 0 0 24px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .login-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 12px;
+        font-size: 15px;
+    }
+</style>
 {% endblock %}
