@@ -1710,6 +1710,7 @@ def parent_assignments():
 
 with app.app_context():
     init_db()
+    run_migrations()
     create_admin_user()
 
 
