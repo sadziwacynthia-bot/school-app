@@ -4,19 +4,17 @@
 {% block content %}
 <div class="page-header">
     <h1>Fees Management</h1>
-    <p>View all student fee records by class and term.</p>
+    <p>View all fee records.</p>
+</div>
+
+<div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+    <a href="{{ url_for('add_fee') }}" class="btn-primary">Add Fee</a>
 </div>
 
 <div class="search-card">
     <form method="GET" action="{{ url_for('fees') }}" class="search-form">
-        <input 
-            type="text" 
-            name="search" 
-            placeholder="Search by student name or student number"
-            value="{{ search or '' }}"
-        >
+        <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by name or student number">
         <button type="submit">Search</button>
-        <a href="{{ url_for('fees') }}" class="clear-btn">Clear</a>
     </form>
 </div>
 
@@ -44,158 +42,49 @@
                     <td>{{ fee.student_number }}</td>
                     <td>{{ fee.first_name }} {{ fee.last_name }}</td>
                     <td>{{ fee.class_name }}</td>
-                    <td>{{ fee.term_name or "Not set" }}</td>
+                    <td>{{ fee.term_name }}</td>
                     <td>${{ fee.amount }}</td>
                     <td>${{ fee.paid_amount }}</td>
                     <td>${{ fee.balance }}</td>
-                    <td>
-                        <span class="status-badge 
-                            {% if fee.status == 'Paid' %}paid
-                            {% elif fee.status == 'Partially Paid' %}partial
-                            {% else %}pending{% endif %}">
-                            {{ fee.status }}
-                        </span>
-                    </td>
+                    <td>{{ fee.status }}</td>
                     <td>{{ fee.due_date or "-" }}</td>
                     <td>
-                        <a href="{{ url_for('update_fee', fee_id=fee.id) }}" class="action-btn">Update Payment</a>
-                    </td>
+    <a href="{{ url_for('update_fee', fee_id=fee.id) }}" class="action-btn">Update Payment</a>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-        <div class="empty-state">
-            <p>No fee records found yet.</p>
-        </div>
+    <p>No fee records found.</p>
     {% endif %}
 </div>
 
 <style>
-.page-header {
-    margin-bottom: 24px;
+.page-header h1 { color:#2563eb; margin:0; }
+.page-header p { color:#6b7280; margin-top:8px; }
+.btn-primary {
+    display:inline-block; background:#2563eb; color:white; text-decoration:none;
+    padding:12px 18px; border-radius:10px; font-weight:600;
 }
-
-.page-header h1 {
-    margin: 0;
-    color: #2563eb;
-    font-size: 30px;
+.search-card, .card-box {
+    background:white; border-radius:16px; padding:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08); margin-bottom:20px;
 }
-
-.page-header p {
-    margin-top: 8px;
-    color: #6b7280;
-    font-size: 15px;
-}
-
-.search-card,
-.card-box {
-    background: white;
-    border-radius: 16px;
-    padding: 20px 24px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    margin-bottom: 20px;
-}
-
 .search-form {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    display:flex; gap:10px; flex-wrap:wrap;
 }
-
 .search-form input {
-    flex: 1;
-    min-width: 260px;
-    padding: 12px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    font-size: 15px;
+    flex:1; min-width:240px; padding:12px; border:1px solid #d1d5db; border-radius:10px;
 }
-
-.search-form input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
 .search-form button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
+    background:#2563eb; color:white; border:none; padding:12px 16px; border-radius:10px;
 }
-
-.search-form button:hover {
-    background: #1e40af;
-}
-
-.clear-btn {
-    display: inline-block;
-    background: #e5e7eb;
-    color: #111827;
-    text-decoration: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.clear-btn:hover {
-    background: #d1d5db;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 1000px;
-}
-
-th, td {
-    padding: 14px 12px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-th {
-    background: #2563eb;
-    color: white;
-    font-weight: 600;
-}
-
-tr:hover {
-    background: #f8fafc;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.status-badge.paid {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.status-badge.partial {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-badge.pending {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
+.table-wrapper { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; min-width:950px; }
+th, td { padding:12px; border-bottom:1px solid #e5e7eb; text-align:left; }
+th { background:#2563eb; color:white; }
 .action-btn {
     display: inline-block;
     background: #2563eb;
@@ -206,15 +95,8 @@ tr:hover {
     font-size: 13px;
     font-weight: 600;
 }
-
 .action-btn:hover {
     background: #1e40af;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 20px 10px;
-    color: #6b7280;
 }
 </style>
 {% endblock %}

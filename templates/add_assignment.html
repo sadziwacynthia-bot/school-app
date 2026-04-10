@@ -7,48 +7,46 @@
     <p>Create a new assignment for a class and subject.</p>
 </div>
 
-<div class="form-card">
-    <form method="POST" class="assignment-form">
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="class_name">Class</label>
-                <select name="class_name" id="class_name" required>
-                    <option value="">Select class</option>
-                    {% for class_name in class_options %}
-                        <option value="{{ class_name }}">{{ class_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+<div class="card-box">
+    <form method="POST" class="form-grid">
+        <div class="form-group">
+            <label>Class</label>
+            <select name="class_name" required>
+                <option value="">Select class</option>
+                {% for class_name in class_options %}
+                    <option value="{{ class_name }}">{{ class_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="subject">Subject</label>
-                <select name="subject" id="subject" required>
-                    <option value="">Select subject</option>
-                    {% for subject in subjects %}
-                        <option value="{{ subject }}">{{ subject }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="form-group">
+            <label>Subject</label>
+            <select name="subject" required>
+                <option value="">Select subject</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="form-group full-width">
-                <label for="title">Title</label>
-                <input type="text" name="title" id="title" required>
-            </div>
+        <div class="form-group full-width">
+            <label>Title</label>
+            <input type="text" name="title" required>
+        </div>
 
-            <div class="form-group full-width">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" rows="5" required></textarea>
-            </div>
+        <div class="form-group full-width">
+            <label>Description</label>
+            <textarea name="description" rows="5" required></textarea>
+        </div>
 
-            <div class="form-group">
-                <label for="due_date">Due Date</label>
-                <input type="date" name="due_date" id="due_date" required>
-            </div>
+        <div class="form-group">
+            <label>Due Date</label>
+            <input type="date" name="due_date" required>
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn-primary">Save Assignment</button>
-            <a href="{{ url_for('assignments') }}" class="btn-secondary">Cancel</a>
+            <a href="{{ url_for('assignments') }}" class="btn-secondary">Back</a>
         </div>
     </form>
 </div>
@@ -57,74 +55,49 @@
 .page-header {
     margin-bottom: 24px;
 }
-
 .page-header h1 {
     margin: 0;
     color: #2563eb;
     font-size: 30px;
 }
-
 .page-header p {
     margin-top: 8px;
     color: #6b7280;
-    font-size: 15px;
 }
-
-.form-card {
+.card-box {
     background: #ffffff;
     border-radius: 16px;
     padding: 24px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
-
-.assignment-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 18px;
 }
-
 .full-width {
     grid-column: 1 / -1;
 }
-
 .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #374151;
 }
-
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 12px 14px;
+    padding: 12px;
     border: 1px solid #d1d5db;
     border-radius: 10px;
-    font-size: 15px;
     box-sizing: border-box;
 }
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
 .form-actions {
+    grid-column: 1 / -1;
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
 }
-
 .btn-primary,
 .btn-secondary {
     display: inline-block;
@@ -132,30 +105,17 @@
     border-radius: 10px;
     text-decoration: none;
     font-weight: 600;
-    text-align: center;
 }
-
 .btn-primary {
     background: #2563eb;
     color: white;
     border: none;
-    cursor: pointer;
 }
-
-.btn-primary:hover {
-    background: #1e40af;
-}
-
 .btn-secondary {
     background: #e5e7eb;
     color: #111827;
 }
-
-.btn-secondary:hover {
-    background: #d1d5db;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 700px) {
     .form-grid {
         grid-template-columns: 1fr;
     }

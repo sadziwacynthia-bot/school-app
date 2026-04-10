@@ -10,136 +10,132 @@
 {% if student %}
 <div class="profile-grid">
 
-    <!-- STUDENT INFO -->
     <div class="card-box">
         <h2>Student Information</h2>
         <div class="info-grid">
-            <div class="info-item">
-                <span class="label">Full Name</span>
-                <span class="value">{{ student.first_name }} {{ student.last_name }}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="label">Student Number</span>
-                <span class="value">{{ student.student_number }}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="label">Class</span>
-                <span class="value">{{ student.class_name or "Not set" }}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="label">Boarding</span>
-                <span class="value">{{ student.boarding_status or "Not set" }}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="label">Gender</span>
-                <span class="value">{{ student.gender or "Not set" }}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="label">DOB</span>
-                <span class="value">{{ student.birthday or "Not set" }}</span>
-            </div>
-
-            <div class="info-item full-width">
-                <span class="label">Address</span>
-                <span class="value">{{ student.home_address or "Not set" }}</span>
-            </div>
+            <div class="info-item"><span class="label">Full Name</span><span class="value">{{ student.first_name }} {{ student.last_name }}</span></div>
+            <div class="info-item"><span class="label">Student Number</span><span class="value">{{ student.student_number }}</span></div>
+            <div class="info-item"><span class="label">Class</span><span class="value">{{ student.class_name or "Not set" }}</span></div>
+            <div class="info-item"><span class="label">Boarding</span><span class="value">{{ student.boarding_status or "Not set" }}</span></div>
+            <div class="info-item"><span class="label">Gender</span><span class="value">{{ student.gender or "Not set" }}</span></div>
+            <div class="info-item"><span class="label">DOB</span><span class="value">{{ student.birthday or "Not set" }}</span></div>
+            <div class="info-item"><span class="label">Status</span><span class="value">{{ student.current_status or "Active" }}</span></div>
+            <div class="info-item"><span class="label">Phone</span><span class="value">{{ student.student_phone or "Not set" }}</span></div>
+            <div class="info-item full-width"><span class="label">Home Address</span><span class="value">{{ student.home_address or "Not set" }}</span></div>
+            <div class="info-item full-width"><span class="label">Medical Information</span><span class="value">{{ student.medical_info or "Not set" }}</span></div>
         </div>
     </div>
 
-    <!-- GUARDIANS -->
     <div class="card-box">
         <h2>Guardians</h2>
-
         <p><strong>Guardian 1:</strong> {{ student.guardian1_name or "Not set" }}</p>
+        <p><strong>Relationship:</strong> {{ student.guardian1_relationship or "Not set" }}</p>
         <p><strong>Phone:</strong> {{ student.guardian1_phone or "Not set" }}</p>
+        <p><strong>WhatsApp:</strong> {{ student.guardian1_whatsapp or "Not set" }}</p>
+        <p><strong>Email:</strong> {{ student.guardian1_email or "Not set" }}</p>
 
-        <hr>
+        <hr style="margin:18px 0;">
 
         <p><strong>Guardian 2:</strong> {{ student.guardian2_name or "Not set" }}</p>
+        <p><strong>Relationship:</strong> {{ student.guardian2_relationship or "Not set" }}</p>
         <p><strong>Phone:</strong> {{ student.guardian2_phone or "Not set" }}</p>
+        <p><strong>WhatsApp:</strong> {{ student.guardian2_whatsapp or "Not set" }}</p>
+        <p><strong>Email:</strong> {{ student.guardian2_email or "Not set" }}</p>
     </div>
-
 </div>
 
-<!-- FEES -->
 <div class="card-box">
     <h2>Fees</h2>
-
     {% if fees %}
-    <table>
-        <tr>
-            <th>Amount</th>
-            <th>Paid</th>
-            <th>Balance</th>
-            <th>Status</th>
-        </tr>
-        {% for fee in fees %}
-        <tr>
-            <td>${{ fee.amount }}</td>
-            <td>${{ fee.paid_amount }}</td>
-            <td>${{ fee.balance }}</td>
-            <td>{{ fee.status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Amount</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fee in fees %}
+                <tr>
+                    <td>{{ fee.term_name }}</td>
+                    <td>${{ fee.amount }}</td>
+                    <td>${{ fee.paid_amount }}</td>
+                    <td>${{ fee.balance }}</td>
+                    <td>{{ fee.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>No fee records</p>
+    <p>No fee records.</p>
     {% endif %}
 </div>
 
-<!-- RESULTS -->
 <div class="card-box">
     <h2>Results</h2>
-
     {% if results %}
-    <table>
-        <tr>
-            <th>Subject</th>
-            <th>Marks</th>
-            <th>Grade</th>
-        </tr>
-        {% for r in results %}
-        <tr>
-            <td>{{ r.subject }}</td>
-            <td>{{ r.marks }}</td>
-            <td>{{ r.grade }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Term</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ r.subject }}</td>
+                    <td>{{ r.term }}</td>
+                    <td>{{ r.marks }}</td>
+                    <td>{{ r.grade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>No results</p>
+    <p>No results.</p>
     {% endif %}
 </div>
 
-<!-- ATTENDANCE -->
 <div class="card-box">
     <h2>Attendance</h2>
-
     {% if attendance_records %}
-    <table>
-        <tr>
-            <th>Date</th>
-            <th>Status</th>
-        </tr>
-        {% for a in attendance_records %}
-        <tr>
-            <td>{{ a.date }}</td>
-            <td>{{ a.status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in attendance_records %}
+                <tr>
+                    <td>{{ a.date }}</td>
+                    <td>{{ a.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <p>No attendance records</p>
+    <p>No attendance records.</p>
     {% endif %}
 </div>
 
-<a href="{{ url_for('students') }}" class="btn">← Back</a>
-
+<div class="form-actions">
+    <a href="{{ url_for('edit_student', id=student.id) }}" class="btn-primary">Edit Student</a>
+    <a href="{{ url_for('students') }}" class="btn-secondary">Back</a>
+</div>
 {% else %}
 <div class="card-box">
     <p>Student not found.</p>
@@ -147,26 +143,29 @@
 {% endif %}
 
 <style>
-.card-box {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+.page-header { margin-bottom:24px; }
+.page-header h1 { margin:0; color:#2563eb; font-size:30px; }
+.page-header p { margin-top:8px; color:#6b7280; }
+.profile-grid { display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:20px; }
+.card-box { background:white; border-radius:16px; padding:24px; box-shadow:0 4px 14px rgba(0,0,0,0.08); margin-bottom:20px; }
+.card-box h2 { margin-top:0; color:#1e40af; }
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.info-item { background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e5e7eb; }
+.full-width { grid-column:1 / -1; }
+.label { display:block; font-size:13px; color:#6b7280; margin-bottom:6px; }
+.value { font-size:16px; font-weight:600; }
+.table-wrapper { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; min-width:700px; }
+th, td { padding:12px; border-bottom:1px solid #e5e7eb; text-align:left; }
+th { background:#2563eb; color:white; }
+.form-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.btn-primary, .btn-secondary {
+    display:inline-block; padding:12px 18px; border-radius:10px; text-decoration:none; font-weight:600;
 }
-
-.profile-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-}
-
-.info-item {
-    margin-bottom: 10px;
-}
-
-table {
-    width: 100%;
+.btn-primary { background:#2563eb; color:white; }
+.btn-secondary { background:#e5e7eb; color:#111827; }
+@media (max-width:900px) {
+    .profile-grid, .info-grid { grid-template-columns:1fr; }
 }
 </style>
-
 {% endblock %}

@@ -44,16 +44,17 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">Save Assignment</button>
+                <a href="{{ url_for('teachers') }}" class="btn-secondary">Back</a>
             </div>
         </form>
     </div>
 
     <div class="card-box">
-        <h2>Quick Notes</h2>
+        <h2>Notes</h2>
         <div class="notes-box">
-            <p>Assign each teacher to the classes and subjects they handle.</p>
-            <p>These assignments help organize teacher dashboards and subject tracking.</p>
-            <p>You can add multiple assignments for the same teacher if they teach more than one class or subject.</p>
+            <p>Assign each teacher to the classes and subjects they teach.</p>
+            <p>A teacher can have multiple assignments.</p>
+            <p>Only teachers from your school should appear here.</p>
         </div>
     </div>
 </div>
@@ -160,19 +161,34 @@
     flex-wrap: wrap;
 }
 
-.btn-primary {
+.btn-primary,
+.btn-secondary {
     display: inline-block;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-primary {
     background: #2563eb;
     color: white;
     border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
     cursor: pointer;
 }
 
 .btn-primary:hover {
     background: #1e40af;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
 }
 
 .notes-box p {
