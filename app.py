@@ -1587,19 +1587,37 @@ def parent_results():
     school_id = session.get("school_id")
     user_id = session.get("user_id")
 
-    result_records = fetch_all(
-        """
+    student = fetch_one("""
+        SELECT s.*
+        FROM students s
+        JOIN guardians g ON s.id = g.student_id
+        WHERE g.parent_user_id = ? AND s.school_id = ?
+        LIMIT 1
+    """, (user_id, school_id))
+
+    if not student:
+        flash("No student linked to this parent account.", "danger")
+        return redirect(url_for("parent_dashboard"))
+
+    fee_summary = fetch_one("""
+        SELECT COALESCE(SUM(balance), 0) AS total_balance
+        FROM fees
+        WHERE student_id = ? AND school_id = ?
+    """, (student["id"], school_id))
+
+    if fee_summary and float(fee_summary["total_balance"] or 0) > 0:
+        flash("Results are not available because of outstanding fees.", "danger")
+        return redirect(url_for("parent_dashboard"))
+
+    result_records = fetch_all("""
         SELECT r.*, s.first_name, s.last_name, s.student_number
         FROM results r
-        JOIN guardians g ON r.student_id = g.student_id
-        JOIN students s ON s.id = r.student_id
-        WHERE g.parent_user_id = ? AND r.school_id = ?
+        JOIN students s ON r.student_id = s.id
+        WHERE r.student_id = ? AND r.school_id = ?
         ORDER BY r.term, r.subject
-        """,
-        (user_id, school_id),
-    )
+    """, (student["id"], school_id))
 
-    return render_template("parent_results.html", result_records=result_records)
+    return render_template("parent_results.html", result_records=result_records, student=student)
 
 
 @app.route("/parent_attendance")
@@ -1906,6 +1924,126 @@ def add_timetable():
 
     return render_template("add_timetable.html", class_options=CLASS_OPTIONS, teachers=teachers_list, subjects=subjects)
 
+@app.route("/print_result/<int:student_id>/<term>")
+@login_required
+@roles_required("school_admin", "super_admin")
+def print_result(student_id, term):
+    school_id = session.get("school_id")
+    role = session.get("role")
+
+    if role == "super_admin":
+        student = fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+        results = fetch_all("""
+            SELECT * FROM results
+            WHERE student_id = ? AND term = ?
+            ORDER BY subject
+        """, (student_id, term))
+        fee_summary = fetch_one("""
+            SELECT COALESCE(SUM(balance), 0) AS total_balance
+            FROM fees
+            WHERE student_id = ?
+        """, (student_id,))
+    else:
+        student = fetch_one("""
+            SELECT * FROM students
+            WHERE id = ? AND school_id = ?
+        """, (student_id, school_id))
+
+        if not student:
+            flash("Student not found or access denied.", "danger")
+            return redirect(url_for("students"))
+
+        results = fetch_all("""
+            SELECT * FROM results
+            WHERE student_id = ? AND school_id = ? AND term = ?
+            ORDER BY subject
+        """, (student_id, school_id, term))
+
+        fee_summary = fetch_one("""
+            SELECT COALESCE(SUM(balance), 0) AS total_balance
+            FROM fees
+            WHERE student_id = ? AND school_id = ?
+        """, (student_id, school_id))
+
+    if not student:
+        flash("Student not found.", "danger")
+        return redirect(url_for("students"))
+
+    total_marks = sum(float(r["marks"] or 0) for r in results)
+    subject_count = len(results)
+    average = round(total_marks / subject_count, 2) if subject_count > 0 else 0
+
+    return render_template(
+        "print_result.html",
+        student=student,
+        results=results,
+        term=term,
+        total_marks=total_marks,
+        average=average,
+        total_balance=float(fee_summary["total_balance"] or 0)
+    )
+@app.route("/send_fee_reminder/<int:student_id>")
+@login_required
+@roles_required("school_admin", "super_admin")
+def send_fee_reminder(student_id):
+    school_id = session.get("school_id")
+    role = session.get("role")
+
+    if role == "super_admin":
+        student = fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+    else:
+        student = fetch_one(
+            "SELECT * FROM students WHERE id = ? AND school_id = ?",
+            (student_id, school_id)
+        )
+
+    if not student:
+        flash("Student not found.", "danger")
+        return redirect(url_for("students"))
+
+    # Calculate total balance
+    if role == "super_admin":
+        fee = fetch_one("""
+            SELECT COALESCE(SUM(balance), 0) AS total_balance
+            FROM fees WHERE student_id = ?
+        """, (student_id,))
+    else:
+        fee = fetch_one("""
+            SELECT COALESCE(SUM(balance), 0) AS total_balance
+            FROM fees WHERE student_id = ? AND school_id = ?
+        """, (student_id, school_id))
+
+    balance = float(fee["total_balance"] or 0)
+
+    if balance <= 0:
+        flash("This student has no outstanding balance.", "success")
+        return redirect(url_for("student_profile", id=student_id))
+
+    phone = student["guardian1_phone"]
+
+    if not phone:
+        flash("No guardian phone number found.", "danger")
+        return redirect(url_for("student_profile", id=student_id))
+
+    # WhatsApp format (remove spaces, add country code manually if needed)
+    phone = phone.replace(" ", "")
+
+    message = f"""
+Dear Parent,
+
+This is a reminder that {student['first_name']} {student['last_name']} has an outstanding school fee balance of ${balance}.
+
+Please make payment as soon as possible.
+
+Thank you.
+""".strip()
+
+    import urllib.parse
+    encoded_message = urllib.parse.quote(message)
+
+    whatsapp_link = f"https://wa.me/{phone}?text={encoded_message}"
+
+    return redirect(whatsapp_link)
 
 with app.app_context():
     init_db()
